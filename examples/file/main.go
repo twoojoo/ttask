@@ -11,6 +11,8 @@ import (
 )
 
 func main() {
+	ctx := context.Background()
+
 	in := "./examples/file/out.txt"
 	out := "./examples/file/in.txt"
 
@@ -22,5 +24,5 @@ func main() {
 		Print[string]("#2 - transformed:\t")),
 		ToFile(out)),
 		Print[string]("#3 - written:\t\t")).
-		Run(context.Background())
+		Run(ctx)
 }
