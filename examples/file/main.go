@@ -11,13 +11,16 @@ import (
 )
 
 func main() {
-	T(T(T(T(T(FromFile("./examples/file/in.txt"),
+	in := "./examples/file/out.txt"
+	out := "./examples/file/in.txt"
+
+	T(T(T(T(T(FromFile(in),
 		Print[string]("#1 - received:\t\t")),
 		Map(func(x string) string {
 			return strings.ToUpper(x)
 		})),
 		Print[string]("#2 - transformed:\t")),
-		ToFile("./examples/file/out.txt")),
+		ToFile(out)),
 		Print[string]("#3 - written:\t\t")).
 		Run(context.Background())
 }
