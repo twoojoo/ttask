@@ -3,7 +3,7 @@ package task
 import "context"
 
 type Meta struct {
-	lastResult Message[any]
+	lastResult any
 	Ctx        context.Context
 	error      error
 }

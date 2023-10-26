@@ -18,13 +18,13 @@ func main() {
 			log.Println("extrancting ctx value...")
 			return x + " (put in ctx) " + count
 		})),
-		TapRaw(func(m *Meta, x string) {
+		Tap(func(x string) {
 			log.Println("sjdfnksdjfnk")
 		})),
-		TapRaw(func(m *Meta, x string) {
+		TapRaw(func(m *Meta, _ *Message[string]) {
 			log.Println(m.ContextValue("k1").(string))
 		})),
-		TapRaw(func(m *Meta, x string) {
+		TapRaw(func(m *Meta, _ *Message[string]) {
 			m.Error(errors.New("I wanted to throw this error"))
 		})).
 		Catch(func(m *Meta, e error) {

@@ -4,20 +4,21 @@ import (
 	"context"
 )
 
-//Exec the first step of a Task (and other steps cascading). 
-//Use this when not manually injecting items in the Task.
+// Exec the first step of a Task (and other steps cascading).
+// Use this when not manually injecting items in the Task.
 func (t *TTask[O, T]) Run(c context.Context) *TTask[O, T] {
 	t.run(c)
 	return t
 }
 
-func (t *TTask[O, T]) run(c context.Context, x ...any) (*T, bool) {
+func (t *TTask[O, T]) run(c context.Context, x ...O) (*T, bool) {
 	t.meta.error = nil
 	t.meta.Ctx = c
 
-	msg := NewEmptyMessage()
+	var msg any
+	msg = NewEmptyMessage()
 	if len(x) > 0 {
-		msg = NewMessage[any](x)
+		msg = NewMessage[O](x[0])
 	}
 
 	ExecNext(t.meta, msg, t.first)
@@ -30,17 +31,20 @@ func (t *TTask[O, T]) run(c context.Context, x ...any) (*T, bool) {
 		return nil, false
 	}
 
-	// lr := nil //t.meta.lastResult.Value.(T)
+	lrMsg, ok := t.meta.lastResult.(*Message[T])
+	if !ok {
+		panic("not ok msg")
+	}
 
-	return nil, true
+	return &lrMsg.Value, true
 }
 
-//Push an item to the Task. Use this when not using a task source.
+// Push an item to the Task. Use this when not using a task source.
 func (t *TTask[O, T]) Inject(c context.Context, x O) (*T, bool) {
 	return t.run(c, x)
 }
 
-//Catch any error that was raised in the Task with the m.Error function.
+// Catch any error that was raised in the Task with the m.Error function.
 func (t *TTask[O, T]) Catch(catcher func(m *Meta, e error)) *TTask[O, T] {
 	t.catcher = catcher
 	return t

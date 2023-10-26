@@ -5,7 +5,7 @@ import (
 )
 
 func ExecNext(m *Meta, x any, next *Step) {
-	// m.lastResult =  reflect.ValueOf(x).Interface()
+	m.lastResult = x
 
 	if m.error != nil {
 		return
