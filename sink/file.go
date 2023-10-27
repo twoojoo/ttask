@@ -23,6 +23,6 @@ func ToFile(path string) task.Operator[string, string] {
 
 		defer file.Close()
 
-		task.ExecNext(m, x, next)
+		m.ExecNext(x, next)
 	}
 }

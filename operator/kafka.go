@@ -16,6 +16,6 @@ func KafkaCommit[T any](consumer *kafka.Consumer) task.Operator[T, T] {
 			log.Fatal(err)
 		}
 
-		task.ExecNext(m, x, next)
+		m.ExecNext(x, next)
 	}
 }

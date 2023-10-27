@@ -23,7 +23,7 @@ func fromKafka(consumer *kafka.Consumer, timeout ...time.Duration) task.Operator
 					WithTopicPartition(msg.TopicPartition).
 					WithKey(string(msg.Key))
 
-				task.ExecNext(m, taskMsg, next)
+				m.ExecNext(taskMsg, next)
 			} else if !err.(kafka.Error).IsTimeout() {
 				// TODO timeout error handling
 				fmt.Printf("Consumer error: %v (%v)\n", err, msg)

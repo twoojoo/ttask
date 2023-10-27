@@ -21,7 +21,7 @@ func (t *TTask[O, T]) run(c context.Context, x ...O) (*T, bool) {
 		msg = NewMessage[O](x[0])
 	}
 
-	ExecNext(t.meta, msg, t.first)
+	t.meta.ExecNext(msg, t.first)
 
 	if t.meta.error != nil {
 		if t.catcher != nil {

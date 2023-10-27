@@ -21,7 +21,7 @@ func fromFile(path string) task.Operator[any, string] {
 
 		for scanner.Scan() {
 			line := scanner.Text()
-			task.ExecNext(m, task.NewMessage(line), next)
+			m.ExecNext(task.NewMessage(line), next)
 		}
 
 		if err := scanner.Err(); err != nil {
