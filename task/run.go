@@ -49,3 +49,9 @@ func (t *TTask[O, T]) Catch(catcher func(m *Meta, e error)) *TTask[O, T] {
 	t.catcher = catcher
 	return t
 }
+
+// Execute the finalizer both if an error occurs and if the task ends (NEVER APPEND AN OPERATOR AFTER USING THIS MEHTOD)
+// func (t *TTask[O, T]) Finally(finalizer func(m *Meta, x Message[T])) *TTask[O, T] {
+	
+// 	return t
+// }

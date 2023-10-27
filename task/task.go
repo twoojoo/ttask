@@ -1,11 +1,12 @@
 package task
 
 type TTask[O, T any] struct {
-	first   *Step
-	last    int
-	catcher func(t *Meta, e error)
-	path    map[int]any
-	meta    *Meta
+	first     *Step
+	last      int
+	catcher   func(t *Meta, e error)
+	finalizer func(t *Meta, x Message[T])
+	path      map[int]any
+	meta      *Meta
 }
 
 // Initialize a Task with the first step message tipe.
@@ -42,7 +43,6 @@ func RawTask[T any]() *TTask[any, T] {
 
 	return &t
 }
-
 
 // T adds an operator to the Task. Returns the updated Task.
 func T[O, T, R any](t *TTask[O, T], operator Operator[T, R]) *TTask[O, R] {
