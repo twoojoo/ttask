@@ -20,13 +20,13 @@ func main() {
 			return x + " (put in ctx) - " + count
 		})),
 		TapRaw(func(m *Meta, _ *Message[string]) {
-			log.Println(m.ContextValue("k1").(string))
+			log.Println(m.Context.Value("k1").(string))
 		})),
 		TapRaw(func(m *Meta, _ *Message[string]) {
 			m.Error(errors.New("I wanted to throw this error - " + count))
 		})).
 		Catch(func(m *Meta, e error) {
-			val := m.ContextValue("k1").(string)
+			val := m.Context.Value("k1").(string)
 			log.Println("ctx value was:", val)
 			log.Println(e)
 		})
