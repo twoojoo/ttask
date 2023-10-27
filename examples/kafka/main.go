@@ -27,8 +27,7 @@ func main() {
 		return nil
 	})
 
-	T(T(
-		FromKafka(c),
+	T(T(FromKafka(c),
 		Print[*kafka.Message]("received >")),
 		Tap(func(x *kafka.Message) {
 			fmt.Println("-------------------------")
