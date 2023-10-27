@@ -36,11 +36,10 @@ func main() {
 			fmt.Println("topic:", *x.TopicPartition.Topic)
 			fmt.Println("offset:", x.TopicPartition.Offset)
 			fmt.Println("-------------------------")
-		})).
-		Catch(func(m *Meta, e error) {
-			v := m.Context.Value("k1").(string)
-			log.Println("ctx value was:", v)
-			log.Println(e)
-		}).
-		Run(context.Background())
+		}),
+	).Catch(func(m *Meta, e error) {
+		v := m.Context.Value("k1").(string)
+		log.Println("ctx value was:", v)
+		log.Println(e)
+	}).Run(context.Background())
 }
