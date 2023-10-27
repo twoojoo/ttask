@@ -26,8 +26,8 @@ func main() {
 			m.Error(errors.New("I wanted to throw this error - " + count))
 		})).
 		Catch(func(m *Meta, e error) {
-			v := m.ContextValue("k1").(string)
-			log.Println("ctx value was:", v)
+			val := m.ContextValue("k1").(string)
+			log.Println("ctx value was:", val)
 			log.Println(e)
 		})
 
