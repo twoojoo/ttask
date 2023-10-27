@@ -4,7 +4,6 @@ type TTask[O, T any] struct {
 	first     *Step
 	last      int
 	catcher   func(t *Meta, e error)
-	finalizer func(t *Meta, x Message[T])
 	path      map[int]any
 	meta      *Meta
 }
