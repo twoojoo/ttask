@@ -27,7 +27,8 @@ func main() {
 		return nil
 	})
 
-	T(T(FromKafka(c),
+	T(T(
+		FromKafka(c),
 		Print[*kafka.Message]("received >")),
 		Tap(func(x *kafka.Message) {
 			fmt.Println("-------------------------")
@@ -40,5 +41,6 @@ func main() {
 			v := m.Context.Value("k1").(string)
 			log.Println("ctx value was:", v)
 			log.Println(e)
-		}).Run(context.Background())
+		}).
+		Run(context.Background())
 }
