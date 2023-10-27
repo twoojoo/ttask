@@ -14,7 +14,7 @@ import (
 func main() {
 	mem := &MemoryStorage[Message[string]]{}
 
-	T(T(FromStringSplit("ciao mi chiamo giovanni e sono della provincia di Treviso", " "),
+	T(T(FromStringSplit("ciao mi chiamo Giovanni e sono della provincia di Treviso", " "),
 		TumblingWindowCount[string](mem, 2)),
 		Tap((func(x []string) { log.Println(x) })),
 	).Catch(func(m *Meta, e error) {
