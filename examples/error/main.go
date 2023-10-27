@@ -28,7 +28,7 @@ func main() {
 		Catch(func(m *Meta, e error) {
 			val := m.Context.Value("k1").(string)
 			log.Println("ctx value was:", val)
-			log.Println(e)
+			log.Println("ERROR:", e)
 		})
 
 	t.Inject(context.Background(), "message 1")

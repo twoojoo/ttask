@@ -31,6 +31,6 @@ func (t *TTask[O, T]) Inject(c context.Context, x O) {
 
 // Catch any error that was raised in the Task with the m.Error function.
 func (t *TTask[O, T]) Catch(catcher func(m *Meta, e error)) *TTask[O, T] {
-	t.catcher = catcher
+	t.meta.catcher = catcher
 	return t
 }

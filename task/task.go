@@ -3,7 +3,6 @@ package task
 type TTask[O, T any] struct {
 	first   *Step
 	last    int
-	catcher func(t *Meta, e error)
 	path    map[int]any
 	meta    *Meta
 }

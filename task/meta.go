@@ -6,8 +6,9 @@ import (
 )
 
 type Meta struct {
+	Context    context.Context
 	lastResult any
-	Context        context.Context
+	catcher    func(t *Meta, e error)
 	error      error
 }
 
@@ -18,13 +19,17 @@ func (m *Meta) Error(e error) {
 	m.error = e
 }
 
-// Trigger the next Task step. 
-// Use this in a raw Operator to handle the Task flow in a custom way 
+// Trigger the next Task step.
+// Use this in a raw Operator to handle the Task flow in a custom way
 // (NOT TIPE SAFE)
 func (m *Meta) ExecNext(x any, next *Step) {
 	m.lastResult = x
 
 	if m.error != nil {
+		if m.catcher != nil {
+			m.catcher(m, m.error)
+		}
+
 		return
 	}
 
