@@ -8,7 +8,7 @@ import (
 	"github.com/twoojoo/ttask/task"
 )
 
-func fromKafka(consumer *kafka.Consumer, timeout ...time.Duration) task.Operator[any, *kafka.Message] {
+func fromKafka(consumer *kafka.Consumer, timeout ...time.Duration) task.Operator[any, []byte] {
 	return func(m *task.Meta, x *task.Message[any], next *task.Step) {
 		to := time.Second
 
@@ -20,7 +20,7 @@ func fromKafka(consumer *kafka.Consumer, timeout ...time.Duration) task.Operator
 			msg, err := consumer.ReadMessage(to)
 			if err == nil {
 				taskMsg := task.NewMessage(msg.Value).
-					WithTopicPartition(msg.TopicPartition).
+					WithKafkaMetadata(msg.TopicPartition).
 					WithKey(string(msg.Key))
 
 				m.ExecNext(taskMsg, next)
@@ -34,6 +34,6 @@ func fromKafka(consumer *kafka.Consumer, timeout ...time.Duration) task.Operator
 
 
 //Source: trigger a Task execution for each received message.
-func FromKafka(consumer *kafka.Consumer, timeout ...time.Duration) *task.TTask[any, *kafka.Message] {
+func FromKafka(consumer *kafka.Consumer, timeout ...time.Duration) *task.TTask[any, []byte] {
 	return task.T(task.Task[any](), fromKafka(consumer, timeout...))
 }

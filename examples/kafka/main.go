@@ -28,17 +28,21 @@ func main() {
 	})
 
 	T(T(FromKafka(c),
-		Print[*kafka.Message]("received >")),
-		Tap(func(x *kafka.Message) {
-			fmt.Println("-------------------------")
-			fmt.Println("key:", string(x.Key))
-			fmt.Println("topic:", *x.TopicPartition.Topic)
-			fmt.Println("offset:", x.TopicPartition.Offset)
-			fmt.Println("-------------------------")
-		}),
+		Print[[]byte]("received >")),
+		PrintKafkaMetadata(),
 	).Catch(func(m *Meta, e error) {
 		v := m.Context.Value("k1").(string)
 		log.Println("ctx value was:", v)
 		log.Println(e)
 	}).Run(context.Background())
+}
+
+func PrintKafkaMetadata() Operator[[]byte, []byte] {
+	return func(m *Meta, x *Message[[]byte], next *Step) {
+		fmt.Println("key:", string(x.Key))
+		fmt.Println("topic:", *x.KafkaMetadata[0].Topic)
+		fmt.Println("offset:", x.KafkaMetadata[0].Offset)
+		fmt.Println("-------------------------")
+		m.ExecNext(x, next)
+	}
 }

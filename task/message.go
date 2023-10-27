@@ -2,29 +2,29 @@ package task
 
 import "github.com/confluentinc/confluent-kafka-go/v2/kafka"
 
-//Wraps the value that is being processed inside the task. Accessible using the Raw version of operators.
+// Wraps the value that is being processed inside the task. Accessible using the Raw version of operators.
 type Message[T any] struct {
-	Key            string
-	TopicPartition []kafka.TopicPartition
-	Value          T
+	Key           string
+	KafkaMetadata []kafka.TopicPartition
+	Value         T
 }
 
 func NewMessage[T any](value T) *Message[T] {
 	return &Message[T]{
-		Value:          value,
-		TopicPartition: []kafka.TopicPartition{},
+		Value:         value,
+		KafkaMetadata: []kafka.TopicPartition{},
 	}
 }
 
 func NewEmptyMessage() *Message[any] {
 	return &Message[any]{
-		Value:          "",
-		TopicPartition: []kafka.TopicPartition{},
+		Value:         "",
+		KafkaMetadata: []kafka.TopicPartition{},
 	}
 }
 
-func (m *Message[T]) WithTopicPartition(tp kafka.TopicPartition) *Message[T] {
-	m.TopicPartition = append(m.TopicPartition, tp)
+func (m *Message[T]) WithKafkaMetadata(tp kafka.TopicPartition) *Message[T] {
+	m.KafkaMetadata = append(m.KafkaMetadata, tp)
 	return m
 }
 
@@ -35,8 +35,8 @@ func (m *Message[T]) WithKey(k string) *Message[T] {
 
 func ReplaceValue[T, R any](m *Message[T], v R) *Message[R] {
 	return &Message[R]{
-		Key: m.Key,
-		TopicPartition: m.TopicPartition,
-		Value: v,
+		Key:           m.Key,
+		KafkaMetadata: m.KafkaMetadata,
+		Value:         v,
 	}
 }
