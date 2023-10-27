@@ -12,9 +12,9 @@ type MemoryStorage[T any] struct {
 	mem map[string][]T
 }
 
-func (s *MemoryStorage[T]) Init() {
-	s.mem = map[string][]T{}
-}
+// func (s *MemoryStorage[T]) Init() {
+// 	s.mem = map[string][]T{}
+// }
 
 func (s *MemoryStorage[T]) Push(key string, item *T) int {
 	s.mem[key] = append(s.mem[key], *item)
