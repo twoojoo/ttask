@@ -37,7 +37,7 @@ func main() {
 			fmt.Println("-------------------------")
 		})).
 		Catch(func(m *Meta, e error) {
-			v := m.ContextValue("k1").(string)
+			v := m.Context.Value("k1").(string)
 			log.Println("ctx value was:", v)
 			log.Println(e)
 		}).Run(context.Background())
