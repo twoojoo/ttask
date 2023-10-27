@@ -31,14 +31,8 @@ func main() {
 			log.Println(e)
 		})
 
-	_, ok := t.Inject(context.Background(), "message 1")
-	if !ok {
-		log.Println("an error occurred or value task stopped - " + count )
-	}
-
+	t.Inject(context.Background(), "message 1")
+	
 	count = "2"
-	_, ok = t.Inject(context.Background(), "message 2")
-	if !ok {
-		log.Println("an error occurred or value task stoppe - " + count)
-	}
+	t.Inject(context.Background(), "message 2")
 }

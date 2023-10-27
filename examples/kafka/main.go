@@ -27,7 +27,7 @@ func main() {
 	})
 
 	T(T(T(FromKafka(c),
-		PrintKafkaMessageMetadata()),
+		PrintKafkaMessageMetadata[[]byte]()),
 		KafkaCommit[[]byte](c)),
 		PrintKafkaCommitMetadata[[]byte](),
 	).Catch(func(m *Meta, e error) {
@@ -36,4 +36,3 @@ func main() {
 		log.Println(e)
 	}).Run(context.Background())
 }
-
