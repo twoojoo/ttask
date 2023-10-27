@@ -18,6 +18,18 @@ func Print[T any](prefix ...string) task.Operator[T, T] {
 	}
 }
 
+func PrintRaw[T any](prefix ...string) task.Operator[T, T] {
+	return func(m *task.Meta, x *task.Message[T], step *task.Step) {
+		if len(prefix) > 0 {
+			fmt.Printf("%s %+v\n", prefix[0], x)
+		} else {
+			fmt.Printf("%+v\n", x)
+		}
+
+		m.ExecNext(x, step)
+	}
+}
+
 func Map[T, R any](cb func(x T) R) task.Operator[T, R] {
 	return func(m *task.Meta, x *task.Message[T], next *task.Step) {
 		m.ExecNext(task.ReplaceValue(x, cb(x.Value)), next)
