@@ -26,8 +26,9 @@ func main() {
 		return nil
 	})
 
-	T(T(FromKafka(c),
+	T(T(T(FromKafka(c),
 		PrintKafkaMessageMetadata()),
+		KafkaCommit[[]byte](c)),
 		PrintKafkaCommitMetadata[[]byte](),
 	).Catch(func(m *Meta, e error) {
 		v := m.Context.Value("k1").(string)
