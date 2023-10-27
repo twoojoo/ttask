@@ -24,7 +24,7 @@ func main() {
 			return strings.ToUpper(x)
 		})),
 		Print[string]("#2 - transformed:\t")),
-		ToFile(out)),
+		ToFile(out, "|")),
 		Print[string]("#3 - written:\t\t")).
 		Catch(func(m *Meta, e error) {
 			log.Fatal(e)

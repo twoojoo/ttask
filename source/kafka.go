@@ -32,6 +32,8 @@ func fromKafka(consumer *kafka.Consumer, timeout ...time.Duration) task.Operator
 	}
 }
 
+
+//Source: trigger a Task execution for each received message.
 func FromKafka(consumer *kafka.Consumer, timeout ...time.Duration) *task.TTask[any, *kafka.Message] {
 	return task.T(task.Task[any](), fromKafka(consumer, timeout...))
 }
