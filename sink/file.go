@@ -11,14 +11,14 @@ func ToFile(path string) task.Operator[string, string] {
 	return func(m *task.Meta, x *task.Message[string], next *task.Step) {
 		file, err := utils.OpenOrCreateFile(path)
 		if err != nil {
-			panic(err)
+			m.Error(err)
 		}
 
 		writer := io.StringWriter(file)
 
 		_, err = writer.WriteString(x.Value + "\n")
 		if err != nil {
-			panic(err)
+			m.Error(err)
 		}
 
 		defer file.Close()

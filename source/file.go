@@ -12,7 +12,7 @@ func fromFile(path string) task.Operator[any, string] {
 		file, err := os.Open(path)
 
 		if err != nil {
-			panic(err)
+			m.Error(err)
 		}
 
 		defer file.Close()
@@ -25,7 +25,7 @@ func fromFile(path string) task.Operator[any, string] {
 		}
 
 		if err := scanner.Err(); err != nil {
-			panic(err)
+			m.Error(err)
 		}
 	}
 }

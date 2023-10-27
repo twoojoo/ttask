@@ -26,7 +26,25 @@ func Task[T any]() *TTask[T, T] {
 	return &t
 }
 
-// T adds an operator to the Task.
+func RawTask[T any]() *TTask[any, T] {
+	t := TTask[any, T]{
+		last: 0,
+		path: map[int]any{},
+		first: &Step{
+			action: nil,
+			next:   nil,
+		},
+		meta: &Meta{
+			Ctx:   nil,
+			error: nil,
+		},
+	}
+
+	return &t
+}
+
+
+// T adds an operator to the Task. Returns the updated Task.
 func T[O, T, R any](t *TTask[O, T], operator Operator[T, R]) *TTask[O, R] {
 	if t.last == 0 {
 		t.first = &Step{
