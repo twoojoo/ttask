@@ -13,7 +13,7 @@ func (t *TTask[O, T]) Run(c context.Context) *TTask[O, T] {
 
 func (t *TTask[O, T]) run(c context.Context, x ...O) (*T, bool) {
 	t.meta.error = nil
-	t.meta.Ctx = c
+	t.meta.Context = c
 
 	var msg any
 	msg = NewEmptyMessage()

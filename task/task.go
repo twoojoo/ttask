@@ -1,11 +1,11 @@
 package task
 
 type TTask[O, T any] struct {
-	first     *Step
-	last      int
-	catcher   func(t *Meta, e error)
-	path      map[int]any
-	meta      *Meta
+	first   *Step
+	last    int
+	catcher func(t *Meta, e error)
+	path    map[int]any
+	meta    *Meta
 }
 
 // Initialize a Task with the first step message tipe.
@@ -18,8 +18,8 @@ func Task[T any]() *TTask[T, T] {
 			next:   nil,
 		},
 		meta: &Meta{
-			Ctx:   nil,
-			error: nil,
+			Context: nil,
+			error:   nil,
 		},
 	}
 
@@ -35,8 +35,8 @@ func RawTask[T any]() *TTask[any, T] {
 			next:   nil,
 		},
 		meta: &Meta{
-			Ctx:   nil,
-			error: nil,
+			Context: nil,
+			error:   nil,
 		},
 	}
 

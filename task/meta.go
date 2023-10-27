@@ -7,18 +7,20 @@ import (
 
 type Meta struct {
 	lastResult any
-	Ctx        context.Context
+	Context        context.Context
 	error      error
 }
 
-func (t *Meta) Error(e error) {
-	t.error = e
+// Calling this function will cause the Task flow to be interrupted before the next operator.
+// Returining immediatelly after calling this funciton is suggested to avoid unwanted code executions (returned value doesn't matter).
+// If the Catch method of the Task isn't used, the error will be lost.
+func (m *Meta) Error(e error) {
+	m.error = e
 }
 
-func (t *Meta) ContextValue(k any) any {
-	return t.Ctx.Value(k)
-}
-
+// Trigger the next Task step. 
+// Use this in a raw Operator to handle the Task flow in a custom way 
+// (NOT TIPE SAFE)
 func (m *Meta) ExecNext(x any, next *Step) {
 	m.lastResult = x
 
