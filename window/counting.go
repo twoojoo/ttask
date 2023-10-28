@@ -16,15 +16,14 @@ type CWOptions[T any] struct {
 
 // Counting Window:
 //
-//...1....2.........3...........4...5......6........7....8....
+// ...1....2.........3...........4...5......6........7....8....
 //
-//..[----------------].........[------------]......[----------
+// ..[----------------].........[------------]......[----------
 func CountingWindow[T any](options CWOptions[T]) task.Operator[T, []T] {
 	stopIncactivityCheckCh := map[string]chan int{}
 
 	return func(m *task.Meta, x *task.Message[T], next *task.Step) {
-		//cancel inactivity check
-
+		//cancel last inactivity check
 		if stopIncactivityCheckCh[x.Key] != nil {
 			stopIncactivityCheckCh[x.Key] <- 1
 		}
@@ -40,7 +39,7 @@ func CountingWindow[T any](options CWOptions[T]) task.Operator[T, []T] {
 
 		size = (options.Storage).Push(x.Key, x, md)
 
-		// inactivity check
+		// start new inactivity check
 		if options.MaxInactivity > 0 && options.Size > 1 {
 			stopIncactivityCheckCh[x.Key] = startInactivityCheck(options.MaxInactivity, func() {
 				items := (options.Storage).Flush(x.Key)
@@ -52,6 +51,11 @@ func CountingWindow[T any](options CWOptions[T]) task.Operator[T, []T] {
 
 		// normal flush
 		if size >= options.Size && options.Size != 0 {
+			//cancel last inactivity check
+			if stopIncactivityCheckCh[x.Key] != nil {
+				stopIncactivityCheckCh[x.Key] <- 1
+			}
+
 			items := (options.Storage).Flush(x.Key)
 			if len(items) > 0 {
 				m.ExecNext(task.ToArray(x, items), next)
