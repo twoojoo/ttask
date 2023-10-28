@@ -7,18 +7,18 @@ import (
 	"github.com/twoojoo/ttask/task"
 )
 
-type SWOptions[T any] struct {
+type TWOptions[T any] struct {
 	Id      string
 	Storage storage.Storage[task.Message[T]]
 	Size    time.Duration
 }
 
-// SlidingWindow:
+// TumblingWindow:
 //
 //..0....1....2....3.........4.........5....6....7...
 //
 //[-------------][-------------][-------------][-----
-func SlidingWindow[T any](options SWOptions[T]) task.Operator[T, []T] {
+func TumblingWindow[T any](options TWOptions[T]) task.Operator[T, []T] {
 	first := true
 
 	return func(m *task.Meta, x *task.Message[T], next *task.Step) {
@@ -63,7 +63,7 @@ func SlidingWindow[T any](options SWOptions[T]) task.Operator[T, []T] {
 	}
 }
 
-func startTicker[T any](options SWOptions[T], onTick func(tick time.Time)) {
+func startTicker[T any](options TWOptions[T], onTick func(tick time.Time)) {
 	t := time.NewTicker(options.Size)
 	defer t.Stop()
 
@@ -73,7 +73,7 @@ func startTicker[T any](options SWOptions[T], onTick func(tick time.Time)) {
 }
 
 //check if there are some open windows that should be ended and flush them
-func recovery[T any](options SWOptions[T], flush func(key string)) {
+func recovery[T any](options TWOptions[T], flush func(key string)) {
 	now := time.Now()
 
 	sizes := options.Storage.GetAllSizes()
@@ -89,7 +89,7 @@ func recovery[T any](options SWOptions[T], flush func(key string)) {
 	}
 }
 
-func flush[T any](options SWOptions[T], k string, m *task.Meta, x *task.Message[T], next *task.Step) {
+func flush[T any](options TWOptions[T], k string, m *task.Meta, x *task.Message[T], next *task.Step) {
 	items := options.Storage.Flush(k)
 	if len(items) > 0 {
 		m.ExecNext(task.ToArray(x, items), next)
