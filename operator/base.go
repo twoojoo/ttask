@@ -2,9 +2,26 @@ package operator
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/twoojoo/ttask/task"
 )
+
+func WithCustomKey[T any](extractor func(x T) string) task.Operator[T, T] {
+	return func(m *task.Meta, x *task.Message[T], step *task.Step) {
+		x.Key = extractor(x.Value)
+
+		m.ExecNext(x, step)
+	}
+}
+
+func WithEventTime[T any](extractor func(x T) time.Time) task.Operator[T, T] {
+	return func(m *task.Meta, x *task.Message[T], step *task.Step) {
+		x.EventTime = extractor(x.Value)
+
+		m.ExecNext(x, step)
+	}
+}
 
 func Print[T any](prefix ...string) task.Operator[T, T] {
 	return func(m *task.Meta, x *task.Message[T], step *task.Step) {

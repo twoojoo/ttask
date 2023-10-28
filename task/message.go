@@ -1,22 +1,30 @@
 package task
 
-// import "github.com/confluentinc/confluent-kafka-go/v2/kafka"
+import "time"
 
 // Wraps the value that is being processed inside the task. Accessible using the Raw version of operators.
 type Message[T any] struct {
-	Key string
-	Value T
+	EventTime     time.Time
+	ingestionTime time.Time
+	Key           string
+	Value         T
 }
 
 func NewMessage[T any](value T) *Message[T] {
+	now := time.Now()
 	return &Message[T]{
+		ingestionTime: now,
+		EventTime:     now,
 		Value: value,
 	}
 }
 
 func NewEmptyMessage() *Message[any] {
+	now := time.Now()
 	return &Message[any]{
-		Value: "",
+		ingestionTime: now,
+		EventTime:     now,
+		Value:         "",
 	}
 }
 
@@ -27,7 +35,7 @@ func (m *Message[T]) WithKey(k string) *Message[T] {
 
 func ReplaceValue[T, R any](m *Message[T], v R) *Message[R] {
 	return &Message[R]{
-		Key: m.Key,
+		Key:   m.Key,
 		Value: v,
 	}
 }
