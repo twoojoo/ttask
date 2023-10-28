@@ -16,7 +16,7 @@ func main() {
 
 	T(T(
 		FromStringSplit("one two three four five six seven eight nine ten", " "),
-		TumblingWindowCount(TWCOptions[string]{
+		CountingWindow(CWOptions[string]{
 			Storage: Memory[string](),
 			Id:      "win1",
 			Size:    2,
@@ -29,11 +29,11 @@ func main() {
 
 	T(T(
 		FromInterval(time.Second, 10, func(count int) int { return count }),
-		TumblingWindowCount(TWCOptions[int]{
+		CountingWindow(CWOptions[int]{
 			Storage:       Memory[int](),
 			Id:            "win2",
 			Size:          2,
-			MaxInactivity: 700 * time.Millisecond,
+			MaxInactivity: 1500 * time.Millisecond,
 		})),
 		Print[[]int](">"),
 	).Catch(func(m *Meta, e error) {
