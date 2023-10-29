@@ -1,17 +1,20 @@
 package task
 
 type TTask[O, T any] struct {
-	first   *Step
-	last    int
-	path    map[int]any
-	meta    *Meta
+	injectable bool
+	first      *Step
+	last       int
+	path       map[int]any
+	meta       *Meta
 }
 
-// Initialize a Task with the first step message tipe.
-func Task[T any]() *TTask[T, T] {
+// Initialize an injectable Task with the first step message type.
+// To push messages to this Task use the Inject method.
+func Injectable[T any]() *TTask[T, T] {
 	t := TTask[T, T]{
-		last: 0,
-		path: map[int]any{},
+		injectable: true,
+		last:       0,
+		path:       map[int]any{},
 		first: &Step{
 			action: nil,
 			next:   nil,

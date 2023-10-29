@@ -2,6 +2,7 @@ package task
 
 import (
 	"context"
+	"errors"
 )
 
 // Exec the first step of a Task (and other steps cascading).
@@ -25,8 +26,13 @@ func (t *TTask[O, T]) run(c context.Context, x ...O) {
 }
 
 // Push an item to the Task. Use this when not using a task source.
-func (t *TTask[O, T]) Inject(c context.Context, x O) {
+func (t *TTask[O, T]) Inject(c context.Context, x O) error {
+	if !t.injectable {
+		return errors.New("TTask Error: can't inject a message in a non-injectable task")
+	}
+
 	t.run(c, x)
+	return nil
 }
 
 // Catch any error that was raised in the Task with the m.Error function.

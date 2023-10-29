@@ -13,7 +13,7 @@ func main() {
 	count := "1"
 
 	t := T(T(T(T(
-		Task[string](),
+		Injectable[string](),
 		Print[string]("received >")),
 		WithContextValue("k1", func(x string) any {
 			log.Println("extrancting ctx value... - " + count)
@@ -31,8 +31,14 @@ func main() {
 			log.Println("ERROR:", e)
 		})
 
-	t.Inject(context.Background(), "message 1")
+	err := t.Inject(context.Background(), "message 1")
+	if err != nil {
+		log.Fatal(err)
+	}
 	
 	count = "2"
-	t.Inject(context.Background(), "message 2")
+	err = t.Inject(context.Background(), "message 2")
+	if err != nil {
+		log.Fatal(err)
+	}
 }
