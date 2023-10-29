@@ -10,7 +10,8 @@ import (
 )
 
 func main() {
-	branch := T(T(Injectable[string](),
+	branch := T(T(
+		Injectable[string]("t2"),
 		Delay[string](time.Second)),
 		Print[string]("> third:"),
 	).Catch(func(m *Meta, e error) {
@@ -18,7 +19,7 @@ func main() {
 	})
 
 	t := T(T(T(
-		Injectable[string](),
+		Injectable[string]("t1"),
 		Print[string]("> first:")),
 		Branch[string](branch)),
 		Print[string]("> second:"),

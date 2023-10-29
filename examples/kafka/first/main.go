@@ -40,7 +40,7 @@ func main() {
 	logs := true
 
 	T(T(T(T(
-		FromKafka(consumer, logs, time.Minute),
+		FromKafka("t1", consumer, logs, time.Minute),
 		WithEventTime(func(_ KafkaMessage[[]byte]) time.Time {
 			log.Println("#> extracting event time..")
 			return time.Now().Add(-time.Second)

@@ -18,7 +18,7 @@ func main() {
 	out := "./examples/file/out.txt"
 
 	T(T(T(T(T(
-		FromFile(in),
+		FromFile("t1", in),
 		Print[string]("#1 - received:\t\t")),
 		Map(func(x string) string {
 			return strings.ToUpper(x)

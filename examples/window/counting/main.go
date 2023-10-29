@@ -15,7 +15,7 @@ func main() {
 
 	// should split 
 	T(T(
-		FromStringSplit("one two three four five six seven eight nine ten", " "),
+		FromStringSplit("t1", "one two three four five six seven eight nine ten", " "),
 		CountingWindow(CWOptions[string]{
 			Size: 3,
 			MaxInactivity: 1000 * time.Millisecond,
@@ -27,7 +27,7 @@ func main() {
 
 
 	T(T(
-		FromInterval(time.Second, 10, func(count int) int { return count }),
+		FromInterval("t2", time.Second, 10, func(count int) int { return count }),
 		CountingWindow(CWOptions[int]{
 			Size:          2,
 			MaxInactivity: 700 * time.Millisecond,
@@ -38,7 +38,7 @@ func main() {
 	}).Run(context.Background())
 
 	T(T(
-		FromInterval(time.Second, 10, func(count int) int { return count }),
+		FromInterval("t3", time.Second, 10, func(count int) int { return count }),
 		CountingWindow(CWOptions[int]{
 			Size:          2,
 			MaxInactivity: 1010 * time.Millisecond,

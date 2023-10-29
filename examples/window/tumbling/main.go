@@ -13,7 +13,7 @@ import (
 
 func main() {
 	T(T(
-		FromInterval(time.Second, 10, func(count int) int { return count }),
+		FromInterval("t1", time.Second, 10, func(count int) int { return count }),
 		TumblingWindow(TWOptions[int]{Size: 1500 * time.Millisecond})),
 		Print[[]int](">"),
 	).Catch(func(m *Meta, e error) {

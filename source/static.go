@@ -14,8 +14,8 @@ func fromItem[T any](item T) task.Operator[any, T] {
 }
 
 // Source: trigger a task once with the give item.
-func FromItem[T any](item T) *task.TTask[any, T] {
-	return task.T(task.Task[any](), fromItem(item))
+func FromItem[T any](taskId string, item T) *task.TTask[any, T] {
+	return task.T(task.Task[any](taskId), fromItem(item))
 }
 
 func fromArray[T any](array []T) task.Operator[any, T] {
@@ -27,8 +27,8 @@ func fromArray[T any](array []T) task.Operator[any, T] {
 }
 
 // Source: trigger a Task execution for each element of the array.
-func FromArray[T any](array []T) *task.TTask[any, T] {
-	return task.T(task.Task[any](), fromArray(array))
+func FromArray[T any](taskId string, array []T) *task.TTask[any, T] {
+	return task.T(task.Task[any](taskId), fromArray(array))
 }
 
 func fromString(string string, step ...int) task.Operator[any, string] {
@@ -47,8 +47,8 @@ func fromString(string string, step ...int) task.Operator[any, string] {
 }
 
 // Source: trigger a Task execution for each char of a string (or for each substring with a given step).
-func FromString(string string, step ...int) *task.TTask[any, string] {
-	return task.T(task.Task[any](), fromString(string, step...))
+func FromString(taskId string, string string, step ...int) *task.TTask[any, string] {
+	return task.T(task.Task[any](taskId), fromString(string, step...))
 }
 
 func fromStringSplit(string string, delimiter string) task.Operator[any, string] {
@@ -60,8 +60,8 @@ func fromStringSplit(string string, delimiter string) task.Operator[any, string]
 }
 
 // Source: trigger a Task execution for each substring, given a certain delimiter.
-func FromStringSplit(string string, delimiter string) *task.TTask[any, string] {
-	return task.T(task.Task[any](), fromStringSplit(string, delimiter))
+func FromStringSplit(taskId string, string string, delimiter string) *task.TTask[any, string] {
+	return task.T(task.Task[any](taskId), fromStringSplit(string, delimiter))
 }
 
 func fromInterval[T any](size time.Duration, max int, generator func(count int) T)  task.Operator[any, T] {
@@ -82,6 +82,6 @@ func fromInterval[T any](size time.Duration, max int, generator func(count int) 
 	}
 }
 
-func FromInterval[T any](size time.Duration, max int, generator func(count int) T) *task.TTask[any, T] {
-	return task.T(task.Task[any](), fromInterval(size, max, generator))
+func FromInterval[T any](taskId string, size time.Duration, max int, generator func(count int) T) *task.TTask[any, T] {
+	return task.T(task.Task[any](taskId), fromInterval(size, max, generator))
 }

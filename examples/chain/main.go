@@ -9,14 +9,15 @@ import (
 )
 
 func main() {
-	chained := T(Injectable[string](),
+	chained := T(
+		Injectable[string]("t2"),
 		Print[string]("> second:"),
 	).Catch(func(m *Meta, e error) {
 		log.Fatal(e)
 	})
 
 	t := T(T(T(
-		Injectable[string](),
+		Injectable[string]("t1"),
 		Print[string]("> first:")),
 		Chain[string](chained)),
 		Print[string]("> third:"),

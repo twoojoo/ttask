@@ -41,8 +41,8 @@ func fromKafka(consumer *kafka.Consumer, logger bool, timeout ...time.Duration) 
 }
 
 // Source: trigger a Task execution for each received message.
-func FromKafka(consumer *kafka.Consumer, logger bool, timeout ...time.Duration) *task.TTask[any, types.KafkaMessage[[]byte]] {
-	return task.T(task.Task[any](), fromKafka(consumer, logger, timeout...))
+func FromKafka(taskId string, consumer *kafka.Consumer, logger bool, timeout ...time.Duration) *task.TTask[any, types.KafkaMessage[[]byte]] {
+	return task.T(task.Task[any](taskId), fromKafka(consumer, logger, timeout...))
 }
 
 func logKafkaMessage(msg *kafka.Message) {

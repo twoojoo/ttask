@@ -1,6 +1,7 @@
 package task
 
 type TTask[O, T any] struct {
+	id         string
 	injectable bool
 	first      *Step
 	last       int
@@ -8,11 +9,12 @@ type TTask[O, T any] struct {
 	meta       *Meta
 }
 
-//Use this to build custom sources only. Not an injectable task.
-func Task[T any]() *TTask[T, T] {
+// Use this to build custom sources only. Not an injectable task.
+func Task[T any](id string) *TTask[T, T] {
 	t := TTask[T, T]{
-		last:       0,
-		path:       map[int]any{},
+		id:   id,
+		last: 0,
+		path: map[int]any{},
 		first: &Step{
 			action: nil,
 			next:   nil,
@@ -28,8 +30,9 @@ func Task[T any]() *TTask[T, T] {
 
 // Initialize an injectable Task with the first step message type as generic.
 // To push messages to this Task use the Inject method.
-func Injectable[T any]() *TTask[T, T] {
+func Injectable[T any](id string) *TTask[T, T] {
 	t := TTask[T, T]{
+		id:         id,
 		injectable: true,
 		last:       0,
 		path:       map[int]any{},

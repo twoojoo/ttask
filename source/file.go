@@ -33,6 +33,6 @@ func fromFile(path string) task.Operator[any, string] {
 }
 
 //Source: read a file an trigger a Task execution for each line.
-func FromFile(path string) *task.TTask[any, string] {
-	return task.T(task.Task[any](), fromFile(path))
+func FromFile(taskId string, path string) *task.TTask[any, string] {
+	return task.T(task.Task[any](taskId), fromFile(path))
 }
