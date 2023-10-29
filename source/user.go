@@ -27,8 +27,8 @@ func fromReadLine(prompt string) task.Operator[any, string] {
 	}
 }
 
-func FromReadline(prompt string) *task.TTask[any, string] {
-	return task.T(task.Task[any](), fromReadLine(prompt))
+func FromReadline(taskId string, prompt string) *task.TTask[any, string] {
+	return task.T(task.Task[any](taskId), fromReadLine(prompt))
 }
 
 func fromReadChar(prompt string) task.Operator[any, rune] {
@@ -46,6 +46,6 @@ func fromReadChar(prompt string) task.Operator[any, rune] {
 	}
 }
 
-func FromReadChar(prompt string) *task.TTask[any, rune] {
-	return task.T(task.Task[any](), fromReadChar(prompt))
+func FromReadChar(taskId string, prompt string) *task.TTask[any, rune] {
+	return task.T(task.Task[any](taskId), fromReadChar(prompt))
 }
