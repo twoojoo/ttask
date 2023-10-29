@@ -3,15 +3,36 @@ package window
 import (
 	"time"
 
+	"github.com/google/uuid"
+
 	"github.com/twoojoo/ttask/storage"
 	"github.com/twoojoo/ttask/task"
 )
 
+//Defaults:
+//	- Storage: memory (no persistence)
+//	- Id: random uuid
+//	- Size: 1 (min: 1)
+//	- MaxIncativity: 0 (no inactivity check) 
 type CWOptions[T any] struct {
 	Id            string
 	Storage       storage.Storage[task.Message[T]]
 	Size          int
 	MaxInactivity time.Duration
+}
+
+func parseCWOptions[T any](o *CWOptions[T]) {
+	if o.Storage == nil {
+		o.Storage = storage.Memory[T]()
+	}
+
+	if o.Id == "" {
+		o.Id = uuid.New().String()
+	}
+
+	if o.Size == 0 {
+		o.Size = 1
+	}
 }
 
 // Counting Window:
@@ -20,6 +41,8 @@ type CWOptions[T any] struct {
 //
 // ..[----------------].........[------------]......[----------
 func CountingWindow[T any](options CWOptions[T]) task.Operator[T, []T] {
+	parseCWOptions(&options)
+
 	stopIncactivityCheckCh := map[string]chan int{}
 
 	return func(m *task.Meta, x *task.Message[T], next *task.Step) {

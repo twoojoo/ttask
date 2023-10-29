@@ -3,14 +3,33 @@ package window
 import (
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/twoojoo/ttask/storage"
 	"github.com/twoojoo/ttask/task"
 )
 
+//Defaults:
+//	- Storage: memory (no persistence)
+//	- Id: random uuid
+//	- Size: 1 second 
 type TWOptions[T any] struct {
 	Id      string
 	Storage storage.Storage[task.Message[T]]
 	Size    time.Duration
+}
+
+func parseTWOptions[T any](o *TWOptions[T]) {
+	if o.Storage == nil {
+		o.Storage = storage.Memory[T]()
+	}
+
+	if o.Id == "" {
+		o.Id = uuid.New().String()
+	}
+
+	if o.Size == 0 {
+		o.Size = 1 * time.Second
+	}
 }
 
 // TumblingWindow:
@@ -19,6 +38,8 @@ type TWOptions[T any] struct {
 //
 //[-------------][-------------][-------------][-----
 func TumblingWindow[T any](options TWOptions[T]) task.Operator[T, []T] {
+	parseTWOptions(&options)
+
 	first := true
 
 	return func(m *task.Meta, x *task.Message[T], next *task.Step) {
