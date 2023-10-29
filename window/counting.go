@@ -9,11 +9,11 @@ import (
 	"github.com/twoojoo/ttask/task"
 )
 
-//Defaults:
-//	- Storage: memory (no persistence)
-//	- Id: random uuid
-//	- Size: 1 (min: 1)
-//	- MaxIncativity: 0 (no inactivity check) 
+// Defaults:
+//   - Storage: memory (no persistence)
+//   - Id: random uuid
+//   - Size: 1 (min: 1)
+//   - MaxIncativity: 0 (no inactivity check)
 type CWOptions[T any] struct {
 	Id            string
 	Storage       storage.Storage[task.Message[T]]
@@ -76,7 +76,10 @@ func CountingWindow[T any](options CWOptions[T]) task.Operator[T, []T] {
 		if size >= options.Size && options.Size != 0 {
 			//cancel last inactivity check
 			if stopIncactivityCheckCh[x.Key] != nil {
-				stopIncactivityCheckCh[x.Key] <- 1
+				select {
+				case stopIncactivityCheckCh[x.Key] <- 1:
+				default:
+				}
 			}
 
 			items := (options.Storage).Flush(x.Key)

@@ -18,7 +18,7 @@ func main() {
 		FromStringSplit("one two three four five six seven eight nine ten", " "),
 		CountingWindow(CWOptions[string]{
 			Size: 3,
-			MaxInactivity: 100 * time.Millisecond,
+			MaxInactivity: 1000 * time.Millisecond,
 		})),
 		Print[[]string](">"),
 	).Catch(func(m *Meta, e error) {

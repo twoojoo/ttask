@@ -5,7 +5,8 @@ import (
 )
 
 func startInactivityCheck(maxInactivity time.Duration, onInactive func()) chan int {
-	ch := make(chan int, 1)
+	//2 because the first message won't block the calling routine
+	ch := make(chan int, 2)
 
 	go func() {
 		time.Sleep(maxInactivity)
