@@ -98,14 +98,14 @@ func Delay[T any](d time.Duration) task.Operator[T, T] {
 	}
 }
 
-func Chain[T any](t task.TTask[T, T]) task.Operator[T, T] {
+func Chain[T any](t *task.TTask[T, T]) task.Operator[T, T] {
 	return func(m *task.Meta, x *task.Message[T], step *task.Step) {
 		t.InjectRaw(m.Context, x)
 		m.ExecNext(x, step)
 	}
 }
 
-func Branch[T any](t task.TTask[T, T]) task.Operator[T, T] {
+func Branch[T any](t *task.TTask[T, T]) task.Operator[T, T] {
 	return func(m *task.Meta, x *task.Message[T], step *task.Step) {
 		msgCopy := *x
 

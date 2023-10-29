@@ -20,7 +20,7 @@ func main() {
 	t := T(T(T(
 		Injectable[string](),
 		Print[string]("> first:")),
-		Branch[string](*branch)),
+		Branch[string](branch)),
 		Print[string]("> second:"),
 	).Catch(func(m *Meta, e error) {
 		log.Fatal(e)

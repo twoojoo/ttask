@@ -18,7 +18,7 @@ func main() {
 	t := T(T(T(
 		Injectable[string](),
 		Print[string]("> first:")),
-		Chain[string](*chained)),
+		Chain[string](chained)),
 		Print[string]("> third:"),
 	).Catch(func(m *Meta, e error) {
 		log.Fatal(e)
