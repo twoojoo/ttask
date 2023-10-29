@@ -13,10 +13,12 @@ import (
 
 func main() {
 
+	// should split 
 	T(T(
 		FromStringSplit("one two three four five six seven eight nine ten", " "),
 		CountingWindow(CWOptions[string]{
 			Size: 3,
+			MaxInactivity: 100 * time.Millisecond,
 		})),
 		Print[[]string](">"),
 	).Catch(func(m *Meta, e error) {
