@@ -82,6 +82,8 @@ func fromInterval[T any](size time.Duration, max int, generator func(count int) 
 	}
 }
 
+// Source: trigger a task execution at a given interval. 
+// Generator function will produce the message, optionally using the interval counter.
 func FromInterval[T any](taskId string, size time.Duration, max int, generator func(count int) T) *task.TTask[any, T] {
 	return task.T(task.Task[any](taskId), fromInterval(size, max, generator))
 }
