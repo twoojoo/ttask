@@ -8,6 +8,7 @@ type TTask[O, T any] struct {
 	meta       *Meta
 }
 
+//Use this to build custom sources only. Not an injectable task.
 func Task[T any]() *TTask[T, T] {
 	t := TTask[T, T]{
 		last:       0,
