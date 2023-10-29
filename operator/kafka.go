@@ -9,6 +9,7 @@ import (
 	"github.com/twoojoo/ttask/types"
 )
 
+//Perform a commit on the current kafka message.
 func KafkaCommit[T any](consumer *kafka.Consumer, logger bool) task.Operator[types.KafkaMessage[T], types.KafkaMessage[T]] {
 	return func(m *task.Meta, x *task.Message[types.KafkaMessage[T]], next *task.Step) {
 		tp := x.Value.TopicPartition
@@ -27,27 +28,27 @@ func KafkaCommit[T any](consumer *kafka.Consumer, logger bool) task.Operator[typ
 	}
 }
 
-func KafkaCommitMany[T any](consumer *kafka.Consumer, logger bool) task.Operator[[]types.KafkaMessage[T], []types.KafkaMessage[T]] {
-	return func(m *task.Meta, x *task.Message[[]types.KafkaMessage[T]], next *task.Step) {
-		tp := []kafka.TopicPartition{}
+// func KafkaCommitMany[T any](consumer *kafka.Consumer, logger bool) task.Operator[[]types.KafkaMessage[T], []types.KafkaMessage[T]] {
+// 	return func(m *task.Meta, x *task.Message[[]types.KafkaMessage[T]], next *task.Step) {
+// 		tp := []kafka.TopicPartition{}
 
-		for _, v := range x.Value {
-			tp = append(tp, v.TopicPartition)
-		}
+// 		for _, v := range x.Value {
+// 			tp = append(tp, v.TopicPartition)
+// 		}
 
-		_, err := consumer.CommitOffsets(tp)
-		if err != nil {
-			m.Error(err)
-			return
-		}
+// 		_, err := consumer.CommitOffsets(tp)
+// 		if err != nil {
+// 			m.Error(err)
+// 			return
+// 		}
 
-		if logger {
+// 		if logger {
 
-		}
+// 		}
 
-		m.ExecNext(x, next)
-	}
-}
+// 		m.ExecNext(x, next)
+// 	}
+// }
 
 func logKafkaCommit(tp kafka.TopicPartition) {
 	boldString := color.New(color.Bold).SprintFunc()
