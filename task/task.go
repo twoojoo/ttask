@@ -73,6 +73,7 @@ func T[O, T, R any](t *TTask[O, T], operator Operator[T, R]) *TTask[O, R] {
 	}
 
 	return &TTask[O, R]{
+		id:         t.id,
 		injectable: t.injectable,
 		first:      t.first,
 		path:       t.path,
