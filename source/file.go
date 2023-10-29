@@ -13,6 +13,7 @@ func fromFile(path string) task.Operator[any, string] {
 
 		if err != nil {
 			m.Error(err)
+			return
 		}
 
 		defer file.Close()
@@ -26,6 +27,7 @@ func fromFile(path string) task.Operator[any, string] {
 
 		if err := scanner.Err(); err != nil {
 			m.Error(err)
+			return
 		}
 	}
 }

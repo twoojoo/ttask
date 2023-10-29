@@ -90,3 +90,29 @@ func TapRaw[T any](cb func(m *task.Meta, x *task.Message[T])) task.Operator[T, T
 		m.ExecNext(x, next)
 	}
 }
+
+func Delay[T any](d time.Duration) task.Operator[T, T] {
+	return func(m *task.Meta, x *task.Message[T], step *task.Step) {
+		time.Sleep(d)
+		m.ExecNext(x, step)
+	}
+}
+
+func Chain[T any](t task.TTask[T, T]) task.Operator[T, T] {
+	return func(m *task.Meta, x *task.Message[T], step *task.Step) {
+		t.InjectRaw(m.Context, x)
+		m.ExecNext(x, step)
+	}
+}
+
+func Branch[T any](t task.TTask[T, T]) task.Operator[T, T] {
+	return func(m *task.Meta, x *task.Message[T], step *task.Step) {
+		msgCopy := *x
+
+		go func () {
+			t.InjectRaw(m.Context, &msgCopy)
+		}()
+
+		m.ExecNext(x, step)
+	}
+}

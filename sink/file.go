@@ -11,8 +11,11 @@ import (
 func ToFile(path string, separator ...string) task.Operator[string, string] {
 	return func(m *task.Meta, x *task.Message[string], next *task.Step) {
 		file, err := utils.OpenOrCreateFile(path)
+		defer file.Close()
+
 		if err != nil {
 			m.Error(err)
+			return
 		}
 
 		s := "\n"
@@ -25,9 +28,9 @@ func ToFile(path string, separator ...string) task.Operator[string, string] {
 		_, err = writer.WriteString(x.Value + s)
 		if err != nil {
 			m.Error(err)
+			return
 		}
 
-		defer file.Close()
 
 		m.ExecNext(x, next)
 	}

@@ -8,6 +8,23 @@ type TTask[O, T any] struct {
 	meta       *Meta
 }
 
+func Task[T any]() *TTask[T, T] {
+	t := TTask[T, T]{
+		last:       0,
+		path:       map[int]any{},
+		first: &Step{
+			action: nil,
+			next:   nil,
+		},
+		meta: &Meta{
+			Context: nil,
+			error:   nil,
+		},
+	}
+
+	return &t
+}
+
 // Initialize an injectable Task with the first step message type as generic.
 // To push messages to this Task use the Inject method.
 func Injectable[T any]() *TTask[T, T] {

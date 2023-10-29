@@ -17,7 +17,8 @@ func fromReadLine(prompt string) task.Operator[any, string] {
 		line, err := reader.ReadString('\n')
 
 		if err != nil {
-			panic(err)
+			m.Error(err)
+			return
 		}
 
 		line = strings.Split(line, "\n")[0]
@@ -37,7 +38,8 @@ func fromReadChar(prompt string) task.Operator[any, rune] {
 		fmt.Print(prompt)
 		rune, _, err := reader.ReadRune()
 		if err != nil {
-			panic(err)
+			m.Error(err)
+			return
 		}
 
 		m.ExecNext(task.NewMessage(rune), next)

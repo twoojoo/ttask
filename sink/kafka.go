@@ -50,6 +50,7 @@ func ToKafka[T any](producer *kafka.Producer, topic string, toBytes func(x T) []
 
 			if !options.SkipErrorReporting {
 				m.Error(errors.New("TTask [ToKafka] error: " + ev.String()))
+				return
 			}
 		}
 	}

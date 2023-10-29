@@ -16,6 +16,7 @@ func KafkaCommit[T any](consumer *kafka.Consumer, logger bool) task.Operator[typ
 		_, err := consumer.CommitOffsets([]kafka.TopicPartition{tp})
 		if err != nil {
 			m.Error(err)
+			return
 		}
 
 		if logger {
@@ -37,6 +38,7 @@ func KafkaCommitMany[T any](consumer *kafka.Consumer, logger bool) task.Operator
 		_, err := consumer.CommitOffsets(tp)
 		if err != nil {
 			m.Error(err)
+			return
 		}
 
 		if logger {
