@@ -55,7 +55,7 @@ func Map[T, R any](cb func(x T) R) task.Operator[T, R] {
 
 func MapRaw[T, R any](cb func(m *task.Meta, x *task.Message[T]) R) task.Operator[T, R] {
 	return func(m *task.Meta, x *task.Message[T], next *task.Step) {
-		m.ExecNext(task.ReplaceValue(x, task.ReplaceValue(x, cb(m, x))), next)
+		m.ExecNext(task.ReplaceValue(x, cb(m, x)), next)
 	}
 }
 
