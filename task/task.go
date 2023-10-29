@@ -52,10 +52,11 @@ func T[O, T, R any](t *TTask[O, T], operator Operator[T, R]) *TTask[O, R] {
 	}
 
 	return &TTask[O, R]{
-		first: t.first,
-		path:  t.path,
-		last:  t.last + 1,
-		meta:  t.meta,
+		injectable: t.injectable,
+		first:      t.first,
+		path:       t.path,
+		last:       t.last + 1,
+		meta:       t.meta,
 	}
 }
 
