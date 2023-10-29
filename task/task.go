@@ -28,7 +28,7 @@ func Injectable[T any]() *TTask[T, T] {
 	return &t
 }
 
-// T adds an operator to the Task. Returns the updated Task.
+// Add an operator to the Task. Returns the updated Task.
 func T[O, T, R any](t *TTask[O, T], operator Operator[T, R]) *TTask[O, R] {
 	if t.last == 0 {
 		t.first = &Step{
