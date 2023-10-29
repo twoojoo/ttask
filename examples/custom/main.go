@@ -22,7 +22,7 @@ func customOperator(toSum int) Operator[string, int] {
 			return 0
 		}
 
-		// next message value
+		// next step message value
 		return num + toSum
 	
 		// operator logic end.
