@@ -29,21 +29,31 @@ func customOperator(toSum int) Operator[string, int] {
 	})
 }
 
-func main() {
 
-	t := T(T(T(
-		Injectable[string]("t1"),
+// generate a custom source
+func customSource(taskId string, end int) *TTask[any, string] {
+	return T(Task[any](taskId), customSourceLogic(end))
+}
+
+//define custom source logic
+func customSourceLogic (end int) Operator[any, string] {
+	 return func(m *Meta, _ *Message[any], next *Step) {
+		for i := 0; i < end; i++ {
+			num := i*i
+			val := strconv.Itoa(num)
+			//trigger a task execution (not type safe)
+			m.ExecNext(NewMessage(val), next)
+		}
+	}
+}
+
+func main() {
+	T(T(T(
+		customSource("t1", 3),
 		Print[string]("string >")),
 		customOperator(2)),
 		Print[int]("integer >"),
 	).Catch(func(m *Meta, e error) {
-		val := m.Context.Value("k1").(string)
-		log.Println("ctx value was:", val)
-		log.Println("ERROR:", e)
-	})
-
-	err := t.Inject(context.Background(), "1")
-	if err != nil {
-		log.Fatal(err)
-	}
+		log.Fatal(e)
+	}).Run(context.Background())
 }
