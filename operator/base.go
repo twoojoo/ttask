@@ -143,7 +143,12 @@ func chain[T any](ch chan chainInfo) task.Operator[T, T] {
 }
 
 // Create an asyncronous branch from the current task using another task.
+// When branching, the parent task and the child task will continue their flow concurrently.
+// Branching a task will cause the child task to be locked as if Lock() method was called.
+// An already locked task can be used as child task when branching.
 func Branch[T any](t *task.TTask[T, T]) task.Operator[T, T] {
+	t.Lock()
+
 	return func(m *task.Meta, x *task.Message[T], next *task.Step) {
 		msgCopy := *x
 
