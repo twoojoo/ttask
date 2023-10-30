@@ -2,11 +2,11 @@
 
 A stream processing library for Go, heavily inspired by [alyxstream](https://github.com/smartpricing/alyxstream).
 
-> **!!!** This module is **not idiomatic Go**. Due to the lack of generics on struct methods (*go 1.21.3*), I was forced to use a weird pattern to replicate a sort of fluent syntax while mantaining full type safety, hence the name of the module. If a future version of go support this feature, a new version of this module may be written.
+> **!!!** This module is **not idiomatic Go**. Due to the lack of generics on struct methods (*go 1.21.3*), I was forced to use a weird pattern to replicate a sort of fluent syntax while mantaining full type safety, hence the name of the module. If a future version of go support this feature, a new version of this module may be written. See [this](https://github.com/golang/go/issues/49085) github issue in the Golang repo.
 
 ### Importing
 
-Even if it's not idiomatic, I suggest to import packages in this way, otherwise your code will be a bit verbose.
+Even if it's not idiomatic, I suggest to import ttask packages in this way, otherwise your code will end up being a bit too verbose.
 
 ```go
 import (
@@ -38,19 +38,27 @@ t := T(T(T(
 		Print[string](">"),
 	).Catch(func(m *Meta, e error) {
 		log.Fatal(e)
-	})
+	}).Lock()
 
 err := t.Inject(context.Background(), "msg")
 ```
 
-> NOTE: if the operator can't infer the message type from a given callback, the type must be provided as generic to the operator itself (e.g. Print and Delay operators) 
+> NOTE: if the operator can't infer the message type from a given callback (e.g. Map operator), the type must be provided as generic to the operator itself (e.g. Print and Delay operators) 
 
-### Source
+> **Lock** method prevents the task from being further extnended with more operators. Trying to extend a locked task will cause the application to panic.
 
-### Sink
+### Sources
+
+### Sinks
 
 ### Operators
 
 ### Windows
 
 ### Chaining and branching
+
+### Raw Operators
+
+#### Task metadata
+
+#### Error handling
