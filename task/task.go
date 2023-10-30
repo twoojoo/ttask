@@ -55,6 +55,10 @@ func Injectable[T any](id string) *TTask[T, T] {
 
 // Add an operator to the Task. Returns the updated Task.
 func T[O, T, R any](t *TTask[O, T], operator Operator[T, R]) *TTask[O, R] {
+	if t.locked {
+		panic("adding operator to locked task: " + t.id)
+	}
+
 	if t.last == 0 {
 		t.first = &Step{
 			action: operator,
