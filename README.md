@@ -45,7 +45,7 @@ err := t.Inject(context.Background(), "msg")
 
 > NOTE: if the operator can't infer the message type from a given callback (e.g. Map operator), the type must be provided as generic to the operator itself (e.g. Print and Delay operators) 
 
-> **Lock** method prevents the task from being further extnended with more operators. Trying to extend a locked task will cause the application to panic.
+> **Lock** method prevents the task from being further extended with more operators. Trying to extend a locked task will cause the application to panic.
 
 ### Sources
 
@@ -62,3 +62,4 @@ err := t.Inject(context.Background(), "msg")
 #### Task metadata
 
 #### Error handling
+
