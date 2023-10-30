@@ -40,7 +40,7 @@ func (m *Meta) Error(e error, decorators ...any) {
 
 // Trigger the next Task step.
 // Use this in a raw Operator to handle the Task flow in a custom way
-// (NOT TIPE SAFE)
+// (NOT TYPE SAFE)
 func (m *Meta) ExecNext(x any, next *Step) {
 	m.lastResult = x
 
