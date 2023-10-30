@@ -16,7 +16,7 @@ func main() {
 		Print[string]("> third:"),
 	).Catch(func(m *Meta, e error) {
 		log.Fatal(e)
-	})
+	}).Lock()
 
 	t := T(T(T(
 		Injectable[string]("t1"),
