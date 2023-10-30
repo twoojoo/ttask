@@ -7,7 +7,7 @@ import (
 	"github.com/twoojoo/ttask/task"
 )
 
-//Set a custom message key from the message itself.
+// Set a custom message key from the message itself.
 func WithCustomKey[T any](extractor func(x T) string) task.Operator[T, T] {
 	return func(m *task.Meta, x *task.Message[T], step *task.Step) {
 		x.Key = extractor(x.Value)
@@ -16,7 +16,7 @@ func WithCustomKey[T any](extractor func(x T) string) task.Operator[T, T] {
 	}
 }
 
-//Set a custom message event time from the message itself.
+// Set a custom message event time from the message itself.
 func WithEventTime[T any](extractor func(x T) time.Time) task.Operator[T, T] {
 	return func(m *task.Meta, x *task.Message[T], step *task.Step) {
 		x.EventTime = extractor(x.Value)
@@ -25,7 +25,7 @@ func WithEventTime[T any](extractor func(x T) time.Time) task.Operator[T, T] {
 	}
 }
 
-//Print message value with a given prefix.
+// Print message value with a given prefix.
 func Print[T any](prefix ...string) task.Operator[T, T] {
 	return func(m *task.Meta, x *task.Message[T], step *task.Step) {
 		if len(prefix) > 0 {
@@ -38,7 +38,7 @@ func Print[T any](prefix ...string) task.Operator[T, T] {
 	}
 }
 
-//Print message metadata and value with a given prefix.
+// Print message metadata and value with a given prefix.
 func PrintRaw[T any](prefix ...string) task.Operator[T, T] {
 	return func(m *task.Meta, x *task.Message[T], step *task.Step) {
 		if len(prefix) > 0 {
@@ -51,22 +51,22 @@ func PrintRaw[T any](prefix ...string) task.Operator[T, T] {
 	}
 }
 
-//Map the message value.
+// Map the message value.
 func Map[T, R any](cb func(x T) R) task.Operator[T, R] {
 	return func(m *task.Meta, x *task.Message[T], next *task.Step) {
 		m.ExecNext(task.ReplaceValue(x, cb(x.Value)), next)
 	}
 }
 
-//Map the message value (with access to task metadata and message metadata).
-//Also allows to create custom operators.
+// Map the message value (with access to task metadata and message metadata).
+// Also allows to create custom operators.
 func MapRaw[T, R any](cb func(m *task.Meta, x *task.Message[T]) R) task.Operator[T, R] {
 	return func(m *task.Meta, x *task.Message[T], next *task.Step) {
 		m.ExecNext(task.ReplaceValue(x, cb(m, x)), next)
 	}
 }
 
-//Filter messages.
+// Filter messages.
 func Filter[T, R any](cb func(x T) bool) task.Operator[T, T] {
 	return func(m *task.Meta, x *task.Message[T], next *task.Step) {
 		ok := cb(x.Value)
@@ -76,7 +76,7 @@ func Filter[T, R any](cb func(x T) bool) task.Operator[T, T] {
 	}
 }
 
-//Filter messages (with access to task metadata and message metadata).
+// Filter messages (with access to task metadata and message metadata).
 func FilterRaw[T, R any](cb func(m *task.Meta, x *task.Message[T]) bool) task.Operator[T, T] {
 	return func(m *task.Meta, x *task.Message[T], next *task.Step) {
 		ok := cb(m, x)
@@ -86,7 +86,7 @@ func FilterRaw[T, R any](cb func(m *task.Meta, x *task.Message[T]) bool) task.Op
 	}
 }
 
-//Perform an action for the message.
+// Perform an action for the message.
 func Tap[T any](cb func(x T)) task.Operator[T, T] {
 	return func(m *task.Meta, x *task.Message[T], next *task.Step) {
 		cb(x.Value)
@@ -94,7 +94,7 @@ func Tap[T any](cb func(x T)) task.Operator[T, T] {
 	}
 }
 
-//Perform an action for the message (with access to task metadata and message metadata).
+// Perform an action for the message (with access to task metadata and message metadata).
 func TapRaw[T any](cb func(m *task.Meta, x *task.Message[T])) task.Operator[T, T] {
 	return func(m *task.Meta, x *task.Message[T], next *task.Step) {
 		cb(m, x)
@@ -102,31 +102,56 @@ func TapRaw[T any](cb func(m *task.Meta, x *task.Message[T])) task.Operator[T, T
 	}
 }
 
-//Delay the next task step.
+// Delay the next task step.
 func Delay[T any](d time.Duration) task.Operator[T, T] {
-	return func(m *task.Meta, x *task.Message[T], step *task.Step) {
+	return func(m *task.Meta, x *task.Message[T], next *task.Step) {
 		time.Sleep(d)
-		m.ExecNext(x, step)
+		m.ExecNext(x, next)
 	}
 }
 
-//Chain another task to the current one syncronously.
-func Chain[T any](t *task.TTask[T, T]) task.Operator[T, T] {
-	return func(m *task.Meta, x *task.Message[T], step *task.Step) {
+// Chain another task to the current one syncronously.
+// Chaining a locked task will cause the application to panic.
+// The act of chaining locks the chained task as if Lock() method was called.
+func Chain[O, T any](t *task.TTask[O, T]) task.Operator[O, T] {
+	chainCh := make(chan chainInfo)
+	task.T(t, chain[T](chainCh))
+	t.Lock()
+
+	return func(m *task.Meta, x *task.Message[O], next *task.Step) {
+		go func() {
+			chainCh <- chainInfo{
+				metaPtr: m,
+				nextPtr: next,
+			}
+		}()
+
 		t.InjectRaw(m.Context, x)
-		m.ExecNext(x, step)
 	}
 }
 
-//Create an asyncronous branch from the current task using another task.
+type chainInfo struct {
+	metaPtr *task.Meta
+	nextPtr *task.Step
+}
+
+func chain[T any](ch chan chainInfo) task.Operator[T, T] {
+	return TapRaw(func(m *task.Meta, x *task.Message[T]) {
+		chainInfo := <-ch
+		chainInfo.metaPtr.ExecNext(x, chainInfo.nextPtr)
+	})
+}
+
+// Create an asyncronous branch from the current task using another task.
 func Branch[T any](t *task.TTask[T, T]) task.Operator[T, T] {
-	return func(m *task.Meta, x *task.Message[T], step *task.Step) {
+	return func(m *task.Meta, x *task.Message[T], next *task.Step) {
 		msgCopy := *x
 
-		go func () {
+		go func() {
 			t.InjectRaw(m.Context, &msgCopy)
 		}()
 
-		m.ExecNext(x, step)
+		m.ExecNext(x, next)
 	}
 }
+

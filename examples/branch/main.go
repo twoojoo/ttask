@@ -25,7 +25,7 @@ func main() {
 		Print[string]("> second:"),
 	).Catch(func(m *Meta, e error) {
 		log.Fatal(e)
-	})
+	}).Lock()
 
 	err := t.Inject(context.Background(), "message")
 	if err != nil {
