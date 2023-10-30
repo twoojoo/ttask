@@ -112,7 +112,7 @@ func Delay[T any](d time.Duration) task.Operator[T, T] {
 
 // Chain another task to the current one syncronously.
 // Chaining a locked task will cause the application to panic.
-// The act of chaining locks the chained task as if Lock() method was called.
+// The act of chaininga locks the chained task as if Lock() method was called.
 func Chain[O, T any](t *task.TTask[O, T]) task.Operator[O, T] {
 	chainCh := make(chan chainInfo)
 	task.T(t, chain[T](chainCh))
