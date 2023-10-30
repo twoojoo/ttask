@@ -6,6 +6,7 @@ import (
 	"reflect"
 )
 
+// Task metadata and methods to be used inside operators.
 type Meta struct {
 	Context    context.Context
 	lastResult any
@@ -14,7 +15,10 @@ type Meta struct {
 }
 
 // Calling this function will cause the Task flow to be interrupted before the next operator.
-// Returining immediatelly after calling this funciton is suggested to avoid unwanted code executions (returned value doesn't matter).
+// Use decorator to generate a more detailed error: "[dec1] [dec2] ... err.Error()".
+//
+// Returining immediatelly after calling this funciton is highly suggested in order to avoid 
+// unwanted code executions (returned value doesn't matter).
 // If the Catch method of the Task isn't used, the error will be lost.
 func (m *Meta) Error(e error, decorators ...any) {
 	if len(decorators) > 0 {
