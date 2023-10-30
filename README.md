@@ -59,6 +59,8 @@ err := t.Inject(context.Background(), "msg")
 
 > **Lock** method prevents the task from being further extended with more operators. Trying to extend a locked task will cause the application to panic.
 
+> **Catch** method allows graceful [error handling](#error-handling).
+
 ### Sources
 
 ### Sinks
