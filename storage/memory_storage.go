@@ -22,7 +22,7 @@ type MemoryStorage[T any] struct {
 func (s *MemoryStorage[T]) GetAllKeys() []string {
 	keys := []string{}
 
-	for k, _ := range s.mem {
+	for k := range s.mem {
 		keys = append(keys, k)
 	}
 
