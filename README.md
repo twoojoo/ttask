@@ -26,7 +26,7 @@ The main abstraction of the library is the Task, wich is a set of ordered operat
 There are two types of task:
 
 - **Injectable** (messages can be pushed programmatically using the **Inject** method)
-- based on a autonomous **Source**, e.g. Kafka consumer, Files, etc.. (using the Inject method here will return an error)
+- based on an autonomous **Source**, e.g. Kafka consumer, Files, etc.. (using the Inject method here will return an error)
 
 ```go
 t := T(T(T(
