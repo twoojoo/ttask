@@ -7,9 +7,16 @@ import (
 
 // Exec the first step of a Task (and other steps cascading).
 // Use this when not manually injecting items in the Task.
-func (t *TTask[O, T]) Run(c context.Context) *TTask[O, T] {
+// This method also lock the task
+func (t *TTask[O, T]) Run(c context.Context) error {
+	if t.injectable {
+		return errors.New("TTask Error: can't run an injectable task")
+	}
+
+	t.Lock()
 	t.run(c)
-	return t
+
+	return nil
 }
 
 func (t *TTask[O, T]) run(c context.Context, x ...O) {

@@ -12,9 +12,10 @@ import (
 func main() {
 	count := "1"
 
-	t := T(T(T(T(
+	t := T(T(T(T(T(
 		Injectable[string]("t1"),
 		Print[string]("received >")),
+		WithCustomKey[string](func(_ string) string { return "default" })),
 		WithContextValue("k1", func(x string) any {
 			log.Println("extrancting ctx value... - " + count)
 			return x + " (put in ctx) - " + count
@@ -23,13 +24,14 @@ func main() {
 			log.Println(m.Context.Value("k1").(string))
 		})),
 		TapRaw(func(m *Meta, x *Message[string]) {
-			m.Error(errors.New("I wanted to throw this error - " + count), "TapRaw:", x.Key)
+			err := errors.New("I wanted to throw this error - " + count)
+			m.Error(err, "TapRaw:", x.Key, "-")
 		}),
 	).Catch(func(m *Meta, e error) {
 		val := m.Context.Value("k1").(string)
 		log.Println("ctx value was:", val)
-		log.Println("ERROR at", e)
-	})
+		log.Printf("[%s] error at %s", m.TaskID(), e.Error())
+	}).Lock()
 
 	err := t.Inject(context.Background(), "message 1")
 	if err != nil {

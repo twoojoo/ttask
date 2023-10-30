@@ -23,6 +23,7 @@ func Task[T any](id string) *TTask[T, T] {
 			next:   nil,
 		},
 		meta: &Meta{
+			taskId:  id,
 			Context: nil,
 			error:   nil,
 		},
@@ -45,6 +46,7 @@ func Injectable[T any](id string) *TTask[T, T] {
 			next:   nil,
 		},
 		meta: &Meta{
+			taskId:  id,
 			Context: nil,
 			error:   nil,
 		},
