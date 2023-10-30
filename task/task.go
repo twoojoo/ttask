@@ -3,6 +3,7 @@ package task
 type TTask[O, T any] struct {
 	id         string
 	injectable bool
+	locked     bool
 	first      *Step
 	last       int
 	path       map[int]any
@@ -12,9 +13,11 @@ type TTask[O, T any] struct {
 // Use this to build custom sources only. Not an injectable task.
 func Task[T any](id string) *TTask[T, T] {
 	t := TTask[T, T]{
-		id:   id,
-		last: 0,
-		path: map[int]any{},
+		id:         id,
+		last:       0,
+		injectable: false,
+		locked:     false,
+		path:       map[int]any{},
 		first: &Step{
 			action: nil,
 			next:   nil,
@@ -34,6 +37,7 @@ func Injectable[T any](id string) *TTask[T, T] {
 	t := TTask[T, T]{
 		id:         id,
 		injectable: true,
+		locked:     false,
 		last:       0,
 		path:       map[int]any{},
 		first: &Step{
@@ -51,6 +55,10 @@ func Injectable[T any](id string) *TTask[T, T] {
 
 // Add an operator to the Task. Returns the updated Task.
 func T[O, T, R any](t *TTask[O, T], operator Operator[T, R]) *TTask[O, R] {
+	if t.locked {
+		panic("adding operator to locked task: " + t.id)
+	}
+
 	if t.last == 0 {
 		t.first = &Step{
 			action: operator,
@@ -75,6 +83,7 @@ func T[O, T, R any](t *TTask[O, T], operator Operator[T, R]) *TTask[O, R] {
 	return &TTask[O, R]{
 		id:         t.id,
 		injectable: t.injectable,
+		locked:     t.locked,
 		first:      t.first,
 		path:       t.path,
 		last:       t.last + 1,

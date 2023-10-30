@@ -56,3 +56,9 @@ func (t *TTask[O, T]) Catch(catcher func(m *Meta, e error)) *TTask[O, T] {
 	t.meta.catcher = catcher
 	return t
 }
+
+// Lock the task to prevent it from being further extended with more operators.
+func (t *TTask[O, T]) Lock(catcher func(m *Meta, e error)) *TTask[O, T] {
+	t.meta.catcher = catcher
+	return t
+}
