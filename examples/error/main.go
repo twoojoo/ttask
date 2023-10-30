@@ -22,13 +22,13 @@ func main() {
 		TapRaw(func(m *Meta, _ *Message[string]) {
 			log.Println(m.Context.Value("k1").(string))
 		})),
-		TapRaw(func(m *Meta, _ *Message[string]) {
-			m.Error(errors.New("I wanted to throw this error - " + count))
+		TapRaw(func(m *Meta, x *Message[string]) {
+			m.Error(errors.New("I wanted to throw this error - " + count), "TapRaw:", x.Key)
 		}),
 	).Catch(func(m *Meta, e error) {
 		val := m.Context.Value("k1").(string)
 		log.Println("ctx value was:", val)
-		log.Println("ERROR:", e)
+		log.Println("ERROR at", e)
 	})
 
 	err := t.Inject(context.Background(), "message 1")

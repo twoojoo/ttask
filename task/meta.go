@@ -2,6 +2,7 @@ package task
 
 import (
 	"context"
+	"fmt"
 	"reflect"
 )
 
@@ -15,8 +16,13 @@ type Meta struct {
 // Calling this function will cause the Task flow to be interrupted before the next operator.
 // Returining immediatelly after calling this funciton is suggested to avoid unwanted code executions (returned value doesn't matter).
 // If the Catch method of the Task isn't used, the error will be lost.
-func (m *Meta) Error(e error) {
-	m.error = e
+func (m *Meta) Error(e error, decorators ...any) {
+	if len(decorators) > 0 {
+		dec := fmt.Sprint(decorators...)
+		m.error = fmt.Errorf("%s %w", dec, e)
+	} else {
+		m.error = e
+	}
 }
 
 // Trigger the next Task step.
