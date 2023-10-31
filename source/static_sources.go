@@ -73,7 +73,7 @@ func fromInterval[T any](size time.Duration, max int, generator func(count int) 
 
 			m.ExecNext(task.NewMessage(value), next)
 
-			if counter == max-1 {
+			if max != 0 && counter == max-1 {
 				break
 			}
 
@@ -84,6 +84,7 @@ func fromInterval[T any](size time.Duration, max int, generator func(count int) 
 
 // Source: trigger a task execution at a given interval. 
 // Generator function will produce the message, optionally using the interval counter.
+// A max of 0 will generate and endless interval.
 func FromInterval[T any](taskId string, size time.Duration, max int, generator func(count int) T) *task.TTask[any, T] {
 	return task.T(task.Task[any](taskId), fromInterval(size, max, generator))
 }

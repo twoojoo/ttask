@@ -13,7 +13,7 @@ import (
 
 func main() {
 	T(T(
-		FromInterval("thw", time.Second, 10, func(count int) int { return count }),
+		FromInterval("thw", time.Second, 0, func(count int) int { return count }),
 		HoppingWindow(HWOptions[int]{
 			Size: 1900 * time.Millisecond,
 			Hop: 2 * time.Second,
