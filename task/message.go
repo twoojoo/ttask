@@ -4,27 +4,27 @@ import "time"
 
 // Wraps the value that is being processed inside the task. Accessible using the Raw version of operators.
 type Message[T any] struct {
-	EventTime     time.Time
-	ingestionTime time.Time
-	Key           string
-	Value         T
+	EventTime      time.Time
+	processingTime time.Time
+	Key            string
+	Value          T
 }
 
 func NewMessage[T any](value T) *Message[T] {
 	now := time.Now()
 	return &Message[T]{
-		ingestionTime: now,
-		EventTime:     now,
-		Value: value,
+		processingTime: now,
+		EventTime:      now,
+		Value:          value,
 	}
 }
 
 func NewEmptyMessage() *Message[any] {
 	now := time.Now()
 	return &Message[any]{
-		ingestionTime: now,
-		EventTime:     now,
-		Value:         "",
+		processingTime: now,
+		EventTime:      now,
+		Value:          "",
 	}
 }
 
