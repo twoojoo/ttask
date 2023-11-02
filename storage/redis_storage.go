@@ -2,14 +2,15 @@ package storage
 
 import (
 	"context"
-	
+
 	"github.com/redis/go-redis/v9"
 	"github.com/twoojoo/ttask/task"
 )
 
-func Redis[T any](id string, redis *redis.Client) *MemoryStorage[task.Message[T]] {
-	return &MemoryStorage[task.Message[T]]{
-		windows: map[string]map[string]window[task.Message[T]]{},
+func Redis[T any](id string, redis *redis.Client) *RedisStorage[task.Message[T]] {
+	return &RedisStorage[task.Message[T]]{
+		client: redis,
+		id: id,
 	}
 }
 
