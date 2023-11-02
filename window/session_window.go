@@ -45,7 +45,7 @@ func SessionWindow[T any](options SWOptions[T]) task.Operator[T, []T] {
 		meta := options.Storage.GetWindowsMetadata(x.Key)
 		meta = filterClosedWindowMeta(meta)
 
-		if len(meta) > 0 {
+		if len(meta) > 0 { // window exists
 			options.Storage.PushItemToWindow(x.Key, meta[0].Id, *x)
 
 			go func() {
@@ -61,7 +61,7 @@ func SessionWindow[T any](options SWOptions[T]) task.Operator[T, []T] {
 					}
 				}
 			}()
-		} else {
+		} else { // window doesn't exist
 			options.Storage.StartNewWindow(x.Key, *x)
 
 			go func() {
