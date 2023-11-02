@@ -8,11 +8,14 @@ type Storage[T any] interface {
 	// GetAllSizes() map[string]int
 	// GetMetadata(key string) map[string]int64
 	// SetMetadata(key string, meta map[string]int64) map[string]int64
-	StartNewWindow(key string, md map[string]int64, elems ...T) WindowMeta
-	PushItemToWindow(k string, id string, item T, md map[string]int64) int
+	StartNewWindow(key string, elem T, start ...int64) WindowMeta
+	StartNewEmptyWindow(key string, start ...int64) WindowMeta
+	PushItemToWindow(k string, id string, item T) int
 	GetWindowsMetadata(k string) []WindowMeta
-	SetWindowMetadata(k string, id string, md map[string]int64)
-	CloseWindow(k string, id string) []T
+	// SetWindowMetadata(k string, id string)
+	CloseWindow(k string, id string)
+	FlushWindow(k string, id string) []T
 	DestroyWindow(k string, id string)
 	GetWindowSize(k string, id string) int
+	GetKeys() []string
 }

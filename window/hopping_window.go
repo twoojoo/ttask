@@ -1,7 +1,6 @@
 package window
 
 import (
-	"log"
 	"time"
 
 	"github.com/google/uuid"
@@ -48,105 +47,89 @@ func HoppingWindow[T any](options HWOptions[T]) task.Operator[T, []T] {
 	parseHWOptions(&options)
 
 	first := true
+	nextStart := int64(0)
 
 	return func(m *task.Meta, x *task.Message[T], next *task.Step) {
 		if first {
-			go startWinLoop[T](
-				options,
-				func() {
-					log.Println("win start")
-				}, func() {
-					log.Println("win end")
-				},
-			)
-
 			first = false
+			go startWinLoop[T](options, func(start int64) {
+				nextStart = start
+
+				for _, k := range options.Storage.GetKeys() {
+					options.Storage.StartNewEmptyWindow(k, nextStart)
+				}
+
+			}, func(end int64) {
+				keys := options.Storage.GetKeys()
+
+				for _, k := range keys {
+					meta := options.Storage.GetWindowsMetadata(k)
+					idsToFlush := []string{}
+
+					for i := range meta {
+						if meta[i].End == 0 && meta[i].Start <= (end-options.Size.Milliseconds()) {
+							options.Storage.CloseWindow(k, meta[i].Id)
+							idsToFlush = append(idsToFlush, meta[i].Id)
+						}
+					}
+
+					//fluhs only windows closed in this turn
+					for _, id := range idsToFlush {
+						items := options.Storage.FlushWindow(k, id)
+						// log.Println("fglushin window", k, id, "len", len(items))
+						if len(items) > 0 {
+							m.ExecNext(task.ToArray(x, items), next)
+						}
+					}
+				}
+			})
 		}
 
-		//start window
-		// go
+		//pushing item
 
-		// if first {
-		// 	// recovery(options, func(key string) {
-		// 	// 	flush(options, key, m, x, next)
-		// 	// })
+		//wait for nextStart to be set by the loop
+		for {
+			if nextStart != 0 {
+				break
+			}
+		}
 
-		// 	// go startTicker[T](options, func(tick time.Time) {
-		// 	// 	keys := options.Storage.GetAllKeys()
+		meta := options.Storage.GetWindowsMetadata(x.Key)
 
-		// 	// 	now := time.Now()
-		// 	// 	start := now.UnixMicro()
-		// 	// 	end := now.Add(options.Size).UnixMicro()
+		// if no window for this key, just create 1 with the last start ts
+		if len(meta) == 0 && !first {
+			options.Storage.StartNewWindow(x.Key, *x, nextStart)
+		} else {
+			lastExists := false
 
-		// 	// 	for _, k := range keys {
-		// 	// 		flush(options, k, m, x, next)
+			// push item to all windows for that key that are not closed yet
+			for _, m := range meta {
+				if m.End == 0 {
+					// log.Printf("pushing %v to %s\n", x.Value, m.Id)
+					options.Storage.PushItemToWindow(x.Key, m.Id, *x)
+				}
 
-		// 	// 		options.Storage.SetMetadata(k, map[string]int64{
-		// 	// 			"start": start,
-		// 	// 			"end":   end,
-		// 	// 		})
-		// 	// 	}
-		// 	// })
+				// check if the next window is already created
+				if m.Start >= nextStart {
+					lastExists = true
+				}
+			}
 
-		// 	first = false
-		// }
-
-		// md := options.Storage.GetMetadata(x.Key)
-		// newMd := md
-
-		// now := time.Now()
-		// start := now.UnixMicro()
-		// end := now.Add(options.Size).UnixMicro()
-
-		// if newMd["start"] == 0 || newMd["end"] == 0 {
-		// 	newMd["start"] = start
-		// 	newMd["end"] = end
-		// }
-
-		// (options.Storage).Push(x.Key, x, newMd)
+			// if next window is not yet created, then create it
+			if !lastExists {
+				options.Storage.StartNewWindow(x.Key, *x, nextStart)
+			}
+		}
 	}
 }
 
-// func startTicker[T any](options TWOptions[T], onTick func(tick time.Time)) {
-// 	t := time.NewTicker(options.Size)
-// 	defer t.Stop()
-
-// 	for tick := range t.C {
-// 		onTick(tick)
-// 	}
-// }
-
-// // check if there are some open windows that should be ended and flush them
-// func recovery[T any](options TWOptions[T], flush func(key string)) {
-// 	now := time.Now()
-
-// 	sizes := options.Storage.GetAllSizes()
-
-// 	for key, size := range sizes {
-// 		if size > 0 {
-// 			md := options.Storage.GetMetadata(key)
-
-// 			if md["end"] >= now.UnixMicro() {
-// 				flush(key)
-// 			}
-// 		}
-// 	}
-// }
-
-// func flush[T any](options TWOptions[T], k string, m *task.Meta, x *task.Message[T], next *task.Step) {
-// 	items := options.Storage.Flush(k)
-// 	if len(items) > 0 {
-// 		m.ExecNext(task.ToArray(x, items), next)
-// 	}
-// }
-
-func startWinLoop[T any](options HWOptions[T], onStart func(), onClose func()) {
+func startWinLoop[T any](options HWOptions[T], onStart func(start int64), onClose func(end int64)) {
 	for {
-		onStart()
+		onStart(time.Now().UnixMilli())
 
 		go func() {
 			time.Sleep(options.Size)
-			onClose()
+			onClose(time.Now().UnixMilli())
 		}()
 
 		time.Sleep(options.Hop)

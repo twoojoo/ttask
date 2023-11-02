@@ -1,7 +1,6 @@
 package window
 
 import (
-	// "fmt"
 	"time"
 
 	"github.com/google/uuid"
@@ -47,31 +46,27 @@ func CountingWindow[T any](options CWOptions[T]) task.Operator[T, []T] {
 	stopIncactivityCheckCh := map[string]chan int{}
 
 	return func(m *task.Meta, x *task.Message[T], next *task.Step) {
-		// fmt.Println(x.Value)
-
 		//cancel last inactivity check
 		if stopIncactivityCheckCh[x.Key] != nil {
 			stopIncactivityCheckCh[x.Key] <- 1
 		}
 
 		meta := options.Storage.GetWindowsMetadata(x.Key)
-		
+
 		var size int
 		if len(meta) > 1 {
 			panic("there should be only 1 window per key in counting window")
 		} else if len(meta) == 0 {
-			meta = append(meta, options.Storage.StartNewWindow(x.Key, map[string]int64{}, *x))
+			meta = append(meta, options.Storage.StartNewWindow(x.Key, *x))
 			size = 1
 		} else {
-			size = options.Storage.PushItemToWindow(x.Key, meta[0].Id, *x, map[string]int64{})
+			size = options.Storage.PushItemToWindow(x.Key, meta[0].Id, *x)
 		}
-
-		// fmt.Println(size)
 
 		// start new inactivity check
 		if options.MaxInactivity > 0 && options.Size > 1 {
 			stopIncactivityCheckCh[x.Key] = startInactivityCheck(options.MaxInactivity, func() {
-				items := options.Storage.CloseWindow(x.Key, meta[0].Id)
+				items := options.Storage.FlushWindow(x.Key, meta[0].Id)
 				if len(items) > 0 {
 					m.ExecNext(task.ToArray(x, items), next)
 				}
@@ -88,7 +83,7 @@ func CountingWindow[T any](options CWOptions[T]) task.Operator[T, []T] {
 				}
 			}
 
-			items := (options.Storage).CloseWindow(x.Key, meta[0].Id)
+			items := (options.Storage).FlushWindow(x.Key, meta[0].Id)
 			if len(items) > 0 {
 				m.ExecNext(task.ToArray(x, items), next)
 			}
