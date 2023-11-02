@@ -12,6 +12,7 @@ type Storage[T any] interface {
 	StartNewEmptyWindow(key string, start ...int64) WindowMeta
 	PushItemToWindow(k string, id string, item T) int
 	GetWindowsMetadata(k string) []WindowMeta
+	GetWindowMetadata(k string, id string) WindowMeta
 	// SetWindowMetadata(k string, id string)
 	CloseWindow(k string, id string)
 	FlushWindow(k string, id string) []T

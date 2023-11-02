@@ -123,6 +123,22 @@ func (s *MemoryStorage[T]) GetWindowsMetadata(k string) []WindowMeta {
 	return meta
 }
 
+func (s *MemoryStorage[T]) GetWindowMetadata(k string, id string) WindowMeta {
+	if winById, ok := s.windows[k]; ok {
+		if win, ok := winById[id]; ok {
+			return WindowMeta{
+				Id:       win.id,
+				Last:     win.last,
+				End:      win.end,
+				Start:    win.start,
+				Metadata: win.metadata,
+			}
+		}
+	}
+
+	return WindowMeta{}
+}
+
 func (s *MemoryStorage[T]) CloseKeyWindows(k string, id string) {
 	if winById, ok := s.windows[k]; ok {
 		if win, ok := winById[id]; ok {
