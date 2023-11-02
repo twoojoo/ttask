@@ -40,6 +40,7 @@ func parseHWOptions[T any](o *HWOptions[T]) {
 
 func HoppingWindow[T any](options HWOptions[T]) task.Operator[T, []T] {
 	parseHWOptions(&options)
+	storage := storage.NewStorageInterface(&options.Storage)
 
 	first := true
 	nextStart := int64(0)
@@ -50,27 +51,27 @@ func HoppingWindow[T any](options HWOptions[T]) task.Operator[T, []T] {
 			go startWinLoop[T](options, func(start int64) {
 				nextStart = start
 
-				for _, k := range options.Storage.GetKeys() {
-					options.Storage.StartNewEmptyWindow(k, nextStart)
+				for _, k := range storage.GetKeys() {
+					storage.StartNewEmptyWindow(k, nextStart)
 				}
 
 			}, func(end int64) {
-				keys := options.Storage.GetKeys()
+				keys := storage.GetKeys()
 
 				for _, k := range keys {
-					meta := options.Storage.GetWindowsMetadata(k)
+					meta := storage.GetWindowsMetadata(k)
 					idsToFlush := []string{}
 
 					for i := range meta {
 						if meta[i].End == 0 && meta[i].Start <= (end-options.Size.Milliseconds()) {
-							options.Storage.CloseWindow(k, meta[i].Id)
+							storage.CloseWindow(k, meta[i].Id)
 							idsToFlush = append(idsToFlush, meta[i].Id)
 						}
 					}
 
 					//fluhs only windows closed in this turn
 					for _, id := range idsToFlush {
-						items := options.Storage.FlushWindow(k, id)
+						items := storage.FlushWindow(k, id)
 						// log.Println("fglushin window", k, id, "len", len(items))
 						if len(items) > 0 {
 							m.ExecNext(task.ToArray(x, items), next)
@@ -89,11 +90,11 @@ func HoppingWindow[T any](options HWOptions[T]) task.Operator[T, []T] {
 			}
 		}
 
-		meta := options.Storage.GetWindowsMetadata(x.Key)
+		meta := storage.GetWindowsMetadata(x.Key)
 
 		// if no window for this key, just create 1 with the last start ts
 		if len(meta) == 0 && !first {
-			options.Storage.StartNewWindow(x.Key, *x, nextStart)
+			storage.StartNewWindow(x.Key, *x, nextStart)
 		} else {
 			lastExists := false
 
@@ -101,7 +102,7 @@ func HoppingWindow[T any](options HWOptions[T]) task.Operator[T, []T] {
 			for _, m := range meta {
 				if m.End == 0 {
 					// log.Printf("pushing %v to %s\n", x.Value, m.Id)
-					options.Storage.PushItemToWindow(x.Key, m.Id, *x)
+					storage.PushItemToWindow(x.Key, m.Id, *x)
 				}
 
 				// check if the next window is already created
@@ -112,7 +113,7 @@ func HoppingWindow[T any](options HWOptions[T]) task.Operator[T, []T] {
 
 			// if next window is not yet created, then create it
 			if !lastExists {
-				options.Storage.StartNewWindow(x.Key, *x, nextStart)
+				storage.StartNewWindow(x.Key, *x, nextStart)
 			}
 		}
 	}

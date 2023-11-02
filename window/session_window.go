@@ -40,36 +40,37 @@ func parseSWOptions[T any](o *SWOptions[T]) {
 
 func SessionWindow[T any](options SWOptions[T]) task.Operator[T, []T] {
 	parseSWOptions(&options)
+	storage := storage.NewStorageInterface(&options.Storage)
 
 	return func(m *task.Meta, x *task.Message[T], next *task.Step) {
-		meta := options.Storage.GetWindowsMetadata(x.Key)
+		meta := storage.GetWindowsMetadata(x.Key)
 		meta = filterClosedWindowMeta(meta)
 
 		if len(meta) > 0 { // window exists
-			options.Storage.PushItemToWindow(x.Key, meta[0].Id, *x)
+			storage.PushItemToWindow(x.Key, meta[0].Id, *x)
 
 			go func() {
 				time.Sleep(options.MaxInactivity)
-				meta := options.Storage.GetWindowMetadata(x.Key, meta[0].Id)
+				meta := storage.GetWindowMetadata(x.Key, meta[0].Id)
 
 				if meta.End == 0 && meta.Last <= time.Now().UnixMilli()-options.MaxInactivity.Milliseconds() {
-					options.Storage.CloseWindow(x.Key, meta.Id)
-					items := options.Storage.FlushWindow(x.Key, meta.Id)
+					storage.CloseWindow(x.Key, meta.Id)
+					items := storage.FlushWindow(x.Key, meta.Id)
 					if len(items) > 0 {
 						m.ExecNext(task.ToArray(x, items), next)
 					}
 				}
 			}()
 		} else { // window doesn't exist
-			meta := options.Storage.StartNewWindow(x.Key, *x)
+			meta := storage.StartNewWindow(x.Key, *x)
 
 			go func() {
 				time.Sleep(options.MaxInactivity)
-				meta := options.Storage.GetWindowMetadata(x.Key, meta.Id)
+				meta := storage.GetWindowMetadata(x.Key, meta.Id)
 
 				if meta.End == 0 && meta.Last <= time.Now().UnixMilli()-options.MaxInactivity.Milliseconds() {
-					options.Storage.CloseWindow(x.Key, meta.Id)
-					items := options.Storage.FlushWindow(x.Key, meta.Id)
+					storage.CloseWindow(x.Key, meta.Id)
+					items := storage.FlushWindow(x.Key, meta.Id)
 					if len(items) > 0 {
 						m.ExecNext(task.ToArray(x, items), next)
 					}
@@ -78,11 +79,11 @@ func SessionWindow[T any](options SWOptions[T]) task.Operator[T, []T] {
 
 			go func() {
 				time.Sleep(options.MaxSize)
-				meta := options.Storage.GetWindowMetadata(x.Key, meta.Id)
+				meta := storage.GetWindowMetadata(x.Key, meta.Id)
 
 				if meta.End == 0 {
-					options.Storage.CloseWindow(x.Key, meta.Id)
-					items := options.Storage.FlushWindow(x.Key, meta.Id)
+					storage.CloseWindow(x.Key, meta.Id)
+					items := storage.FlushWindow(x.Key, meta.Id)
 					if len(items) > 0 {
 						m.ExecNext(task.ToArray(x, items), next)
 					}

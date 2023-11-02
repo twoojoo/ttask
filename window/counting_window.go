@@ -42,6 +42,7 @@ func parseCWOptions[T any](o *CWOptions[T]) {
 // ..[----------------].........[------------]......[----------
 func CountingWindow[T any](options CWOptions[T]) task.Operator[T, []T] {
 	parseCWOptions(&options)
+	storage := storage.NewStorageInterface(&options.Storage)
 
 	stopIncactivityCheckCh := map[string]chan int{}
 
@@ -51,22 +52,22 @@ func CountingWindow[T any](options CWOptions[T]) task.Operator[T, []T] {
 			stopIncactivityCheckCh[x.Key] <- 1
 		}
 
-		meta := options.Storage.GetWindowsMetadata(x.Key)
+		meta := storage.GetWindowsMetadata(x.Key)
 
 		var size int
 		if len(meta) > 1 {
 			panic("there should be only 1 window per key in counting window")
 		} else if len(meta) == 0 {
-			meta = append(meta, options.Storage.StartNewWindow(x.Key, *x))
+			meta = append(meta, storage.StartNewWindow(x.Key, *x))
 			size = 1
 		} else {
-			size = options.Storage.PushItemToWindow(x.Key, meta[0].Id, *x)
+			size = storage.PushItemToWindow(x.Key, meta[0].Id, *x)
 		}
 
 		// start new inactivity check
 		if options.MaxInactivity > 0 && options.Size > 1 {
 			stopIncactivityCheckCh[x.Key] = startInactivityCheck(options.MaxInactivity, func() {
-				items := options.Storage.FlushWindow(x.Key, meta[0].Id)
+				items := storage.FlushWindow(x.Key, meta[0].Id)
 				if len(items) > 0 {
 					m.ExecNext(task.ToArray(x, items), next)
 				}
@@ -83,7 +84,7 @@ func CountingWindow[T any](options CWOptions[T]) task.Operator[T, []T] {
 				}
 			}
 
-			items := (options.Storage).FlushWindow(x.Key, meta[0].Id)
+			items := (storage).FlushWindow(x.Key, meta[0].Id)
 			if len(items) > 0 {
 				m.ExecNext(task.ToArray(x, items), next)
 			}

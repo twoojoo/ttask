@@ -40,6 +40,7 @@ func parseTWOptions[T any](o *TWOptions[T]) {
 // [-------------][-------------][-------------][-----
 func TumblingWindow[T any](options TWOptions[T]) task.Operator[T, []T] {
 	parseTWOptions(&options)
+	storage := storage.NewStorageInterface(&options.Storage)
 
 	first := true
 
@@ -50,24 +51,24 @@ func TumblingWindow[T any](options TWOptions[T]) task.Operator[T, []T] {
 					now := time.Now().UnixMilli()
 					idsToFlush := []string{}
 
-					keys := options.Storage.GetKeys()
+					keys := storage.GetKeys()
 
 					for _, k := range keys {
-						meta := options.Storage.GetWindowsMetadata(k)
+						meta := storage.GetWindowsMetadata(k)
 
 						for i := range meta {
-							options.Storage.CloseWindow(k, meta[i].Id)
+							storage.CloseWindow(k, meta[i].Id)
 							idsToFlush = append(idsToFlush, meta[i].Id)
 						}
 
-						options.Storage.StartNewEmptyWindow(k, now)
+						storage.StartNewEmptyWindow(k, now)
 					}
 
 					first = false
 
 					for _, k := range keys {
 						for _, id := range idsToFlush {
-							items := options.Storage.FlushWindow(k, id)
+							items := storage.FlushWindow(k, id)
 							if len(items) > 0 {
 								m.ExecNext(task.ToArray(x, items), next)
 							}
@@ -83,13 +84,13 @@ func TumblingWindow[T any](options TWOptions[T]) task.Operator[T, []T] {
 			}
 		}
 
-		meta := options.Storage.GetWindowsMetadata(x.Key)
+		meta := storage.GetWindowsMetadata(x.Key)
 		meta = filterClosedWindowMeta(meta)
 
 		if len(meta) == 0 {
-			options.Storage.StartNewWindow(x.Key, *x)
+			storage.StartNewWindow(x.Key, *x)
 		} else {
-			options.Storage.PushItemToWindow(x.Key, meta[0].Id, *x)
+			storage.PushItemToWindow(x.Key, meta[0].Id, *x)
 		}
 	}
 }
