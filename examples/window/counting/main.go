@@ -25,6 +25,8 @@ func main() {
 		log.Fatal(e)
 	}).Run(context.Background())
 
+	// time.Sleep(2 * time.Second)
+
 
 	T(T(
 		FromInterval("t2", time.Second, 10, func(count int) int { return count }),
