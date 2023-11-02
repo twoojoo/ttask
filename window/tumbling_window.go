@@ -50,7 +50,6 @@ func TumblingWindow[T any](options TWOptions[T]) task.Operator[T, []T] {
 			go func() {
 				for range time.Tick(options.Size) {
 					now := time.Now().UnixMilli()
-					// idsToFlush := []string{}
 
 					keys := storage.GetKeys()
 

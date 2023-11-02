@@ -19,7 +19,6 @@ type CWOptions[T any] struct {
 	Storage       storage.Storage[task.Message[T]]
 	Size          int
 	MaxInactivity time.Duration
-	Watermark     time.Duration
 }
 
 func parseCWOptions[T any](o *CWOptions[T]) {
@@ -68,12 +67,11 @@ func CountingWindow[T any](options CWOptions[T]) task.Operator[T, []T] {
 		// start new inactivity check
 		if options.MaxInactivity > 0 && options.Size > 1 {
 			stopIncactivityCheckCh[x.Key] = startInactivityCheck(options.MaxInactivity, func() {
-				storage.CloseWindow(x.Key, meta[0].Id, options.Watermark, func(items []task.Message[T]) {
-					if len(items) > 0 {
-						m.ExecNext(task.ToArray(x, items), next)
-					}
-				})
-
+				// storage.CloseWindow(x.Key, meta[0].Id)
+				items := storage.FlushWindow(x.Key, meta[0].Id)
+				if len(items) > 0 {
+					m.ExecNext(task.ToArray(x, items), next)
+				}
 			})
 		}
 
@@ -87,11 +85,11 @@ func CountingWindow[T any](options CWOptions[T]) task.Operator[T, []T] {
 				}
 			}
 
-			storage.CloseWindow(x.Key, meta[0].Id, options.Watermark, func(items []task.Message[T]) {
-				if len(items) > 0 {
-					m.ExecNext(task.ToArray(x, items), next)
-				}
-			})
+			// storage.CloseWindow(x.Key, meta[0].Id)
+			items := storage.FlushWindow(x.Key, meta[0].Id)
+			if len(items) > 0 {
+				m.ExecNext(task.ToArray(x, items), next)
+			}
 		}
 	}
 }

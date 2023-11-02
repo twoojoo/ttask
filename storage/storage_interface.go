@@ -47,6 +47,10 @@ func (s *StorageInterface[T]) CloseWindow(k string, id string, watermark time.Du
 	}()
 }
 
+func (s *StorageInterface[T]) FlushWindow(k string, id string) []T {
+	return (*s.storage).FlushWindow(k, id)
+}
+
 func (s *StorageInterface[T]) PushItemToWindow(k string, id string, item T) int {
 	return (*s.storage).PushItemToWindow(k, id, item)
 }

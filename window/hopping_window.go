@@ -61,7 +61,6 @@ func HoppingWindow[T any](options HWOptions[T]) task.Operator[T, []T] {
 
 				for _, k := range keys {
 					meta := storage.GetWindowsMetadata(k)
-					// idsToFlush := []string{}
 
 					for i := range meta {
 						if meta[i].End == 0 && meta[i].Start <= (end-options.Size.Milliseconds()) {
@@ -72,15 +71,6 @@ func HoppingWindow[T any](options HWOptions[T]) task.Operator[T, []T] {
 							})
 						}
 					}
-
-					//fluhs only windows closed in this turn
-					// for _, id := range idsToFlush {
-					// 	items := storage.FlushWindow(k, id)
-					// 	// log.Println("fglushin window", k, id, "len", len(items))
-					// 	if len(items) > 0 {
-					// 		m.ExecNext(task.ToArray(x, items), next)
-					// 	}
-					// }
 				}
 			})
 		}
