@@ -1,10 +1,14 @@
 package storage
 
+import (
+	"log"
+)
+
 type StorageInterface[T any] struct {
 	storage *Storage[T]
 }
 
-func NewStorageInterface[T any](s *Storage[T]) StorageInterface[T]{
+func NewStorageInterface[T any](s *Storage[T]) StorageInterface[T] {
 	return StorageInterface[T]{storage: s}
 }
 
@@ -16,8 +20,8 @@ func (s *StorageInterface[T]) StartNewEmptyWindow(key string, start ...int64) Wi
 	return (*s.storage).StartNewEmptyWindow(key, start...)
 }
 
-func (s *StorageInterface[T]) StartNewWindow(key string, elem T, start ...int64) WindowMeta {
-	return (*s.storage).StartNewWindow(key, elem, start...)
+func (s *StorageInterface[T]) StartNewWindow(k string, item T, start ...int64) WindowMeta {
+	return (*s.storage).StartNewWindow(k, item, start...)
 }
 
 func (s *StorageInterface[T]) GetWindowSize(k string, id string) int {
@@ -46,4 +50,8 @@ func (s *StorageInterface[T]) PushItemToWindow(k string, id string, item T) int 
 
 func (s *StorageInterface[T]) DestroyWindow(k string, id string) {
 	(*s.storage).DestroyWindow(k, id)
+}
+
+func (s *StorageInterface[T]) log(fmt string, v ...any) {
+	log.Printf(fmt+"\n", v...)
 }

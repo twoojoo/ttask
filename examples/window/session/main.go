@@ -14,8 +14,8 @@ import (
 func main() {
 	T(T(
 		FromInterval("t1", time.Second, 10, func(count int) int { return count }),
-		SessionWindow(SWOptions[int]{MaxInactivity: 700 * time.Millisecond})),
-		Print[[]int](">"),
+		SessionWindow(SWOptions[int]{MaxInactivity: 1010 * time.Millisecond})),
+		Print[[]int]("> window closed"),
 	).Catch(func(m *Meta, e error) {
 		log.Fatal(e)
 	}).Run(context.Background())
