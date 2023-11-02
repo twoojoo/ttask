@@ -38,11 +38,6 @@ func parseHWOptions[T any](o *HWOptions[T]) {
 	}
 }
 
-// TumblingWindow:
-//
-// ..0....1....2....3.........4.........5....6....7...
-//
-// [-------------][-------------][-------------][-----
 func HoppingWindow[T any](options HWOptions[T]) task.Operator[T, []T] {
 	parseHWOptions(&options)
 

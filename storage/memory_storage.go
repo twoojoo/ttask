@@ -68,6 +68,7 @@ func (s *MemoryStorage[T]) StartNewWindow(key string, elem T, start ...int64) Wi
 		Id:       id,
 		Metadata: map[string]int64{},
 		Start:    time.Now().UnixMilli(),
+		Last:     time.Now().UnixMilli(),
 	}
 
 	if len(start) > 0 {
@@ -80,6 +81,7 @@ func (s *MemoryStorage[T]) StartNewWindow(key string, elem T, start ...int64) Wi
 		elems:    []T{elem},
 		start:    winMeta.Start,
 		end:      winMeta.End,
+		last:     winMeta.Last,
 	}
 
 	return winMeta
@@ -112,6 +114,7 @@ func (s *MemoryStorage[T]) GetWindowsMetadata(k string) []WindowMeta {
 			Metadata: s.windows[k][id].metadata,
 			Start:    s.windows[k][id].start,
 			End:      s.windows[k][id].end,
+			Last:     s.windows[k][id].last,
 		}
 
 		meta = append(meta, wm)
@@ -131,7 +134,7 @@ func (s *MemoryStorage[T]) CloseKeyWindows(k string, id string) {
 func (s *MemoryStorage[T]) CloseWindow(k string, id string) {
 	if winById, ok := s.windows[k]; ok {
 		if win, ok := winById[id]; ok {
-			win.end = time.Now().UnixMilli() 
+			win.end = time.Now().UnixMilli()
 			s.windows[k][id] = win
 		}
 	}

@@ -5,6 +5,7 @@ type window[T any] struct {
 	metadata map[string]int64
 	start    int64
 	end      int64
+	last     int64
 	elems    []T
 }
 
@@ -13,4 +14,5 @@ type WindowMeta struct {
 	Metadata map[string]int64
 	Start    int64
 	End      int64
+	Last     int64
 }
