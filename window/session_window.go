@@ -50,14 +50,17 @@ func SessionWindow[T any](options SWOptions[T]) task.Operator[T, []T] {
 
 			go func() {
 				time.Sleep(options.MaxInactivity)
+
 				meta := options.Storage.GetWindowsMetadata(x.Key)
 				meta = filterClosedWindowMeta(meta)
 
-				if meta[0].End == 0 && meta[0].Last <= time.Now().UnixMilli()-options.MaxInactivity.Milliseconds() {
-					options.Storage.CloseWindow(x.Key, meta[0].Id)
-					items := options.Storage.FlushWindow(x.Key, meta[0].Id)
-					if len(items) > 0 {
-						m.ExecNext(task.ToArray(x, items), next)
+				if len(meta) > 0 {
+					if meta[0].End == 0 && meta[0].Last <= time.Now().UnixMilli()-options.MaxInactivity.Milliseconds() {
+						options.Storage.CloseWindow(x.Key, meta[0].Id)
+						items := options.Storage.FlushWindow(x.Key, meta[0].Id)
+						if len(items) > 0 {
+							m.ExecNext(task.ToArray(x, items), next)
+						}
 					}
 				}
 			}()
@@ -65,15 +68,35 @@ func SessionWindow[T any](options SWOptions[T]) task.Operator[T, []T] {
 			options.Storage.StartNewWindow(x.Key, *x)
 
 			go func() {
-				time.Sleep(options.MaxSize)
+				time.Sleep(options.MaxInactivity)
+
 				meta := options.Storage.GetWindowsMetadata(x.Key)
 				meta = filterClosedWindowMeta(meta)
 
-				if meta[0].End == 0 {
-					options.Storage.CloseWindow(x.Key, meta[0].Id)
-					items := options.Storage.FlushWindow(x.Key, meta[0].Id)
-					if len(items) > 0 {
-						m.ExecNext(task.ToArray(x, items), next)
+				if len(meta) > 0 {
+					if meta[0].End == 0 && meta[0].Last <= time.Now().UnixMilli()-options.MaxInactivity.Milliseconds() {
+						options.Storage.CloseWindow(x.Key, meta[0].Id)
+						items := options.Storage.FlushWindow(x.Key, meta[0].Id)
+						if len(items) > 0 {
+							m.ExecNext(task.ToArray(x, items), next)
+						}
+					}
+				}
+			}()
+
+			go func() {
+				time.Sleep(options.MaxSize)
+
+				meta := options.Storage.GetWindowsMetadata(x.Key)
+				meta = filterClosedWindowMeta(meta)
+
+				if len(meta) > 0 {
+					if meta[0].End == 0 {
+						options.Storage.CloseWindow(x.Key, meta[0].Id)
+						items := options.Storage.FlushWindow(x.Key, meta[0].Id)
+						if len(items) > 0 {
+							m.ExecNext(task.ToArray(x, items), next)
+						}
 					}
 				}
 			}()
