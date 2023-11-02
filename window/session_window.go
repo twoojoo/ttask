@@ -11,13 +11,13 @@ import (
 // Defaults:
 //   - Storage: memory (no persistence)
 //   - Id: random uuid
-//   - Size: 1 second
-//   - MaxSize: Size * 2
+//   - MaxInactivity: 1 second
+//   - MaxSize: MaxInactivity * 2
 type SWOptions[T any] struct {
-	Id      string
-	Storage storage.Storage[task.Message[T]]
-	Size    time.Duration
-	MaxSize time.Duration
+	Id            string
+	Storage       storage.Storage[task.Message[T]]
+	MaxSize       time.Duration
+	MaxInactivity time.Duration
 }
 
 func parseSWOptions[T any](o *SWOptions[T]) {
@@ -29,12 +29,12 @@ func parseSWOptions[T any](o *SWOptions[T]) {
 		o.Id = uuid.New().String()
 	}
 
-	if o.Size == 0 {
-		o.Size = 1 * time.Second
+	if o.MaxInactivity == 0 {
+		o.MaxInactivity = 1 * time.Second
 	}
 
 	if o.MaxSize == 0 {
-		o.MaxSize = 2 * o.Size
+		o.MaxSize = 2 * o.MaxInactivity
 	}
 }
 
@@ -49,11 +49,11 @@ func SessionWindow[T any](options SWOptions[T]) task.Operator[T, []T] {
 			options.Storage.PushItemToWindow(x.Key, meta[0].Id, *x)
 
 			go func() {
-				time.Sleep(options.Size)
+				time.Sleep(options.MaxInactivity)
 				meta := options.Storage.GetWindowsMetadata(x.Key)
 				meta = filterClosedWindowMeta(meta)
 
-				if meta[0].End == 0 && meta[0].Last <= time.Now().UnixMilli()-options.Size.Milliseconds() {
+				if meta[0].End == 0 && meta[0].Last <= time.Now().UnixMilli()-options.MaxInactivity.Milliseconds() {
 					options.Storage.CloseWindow(x.Key, meta[0].Id)
 					items := options.Storage.FlushWindow(x.Key, meta[0].Id)
 					if len(items) > 0 {
