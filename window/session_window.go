@@ -18,6 +18,7 @@ type SWOptions[T any] struct {
 	Storage       storage.Storage[task.Message[T]]
 	MaxSize       time.Duration
 	MaxInactivity time.Duration
+	Watermark     time.Duration
 }
 
 func parseSWOptions[T any](o *SWOptions[T]) {
@@ -60,11 +61,11 @@ func SessionWindow[T any](options SWOptions[T]) task.Operator[T, []T] {
 				meta := storage.GetWindowMetadata(x.Key, meta[0].Id)
 
 				if meta.End == 0 && meta.Last <= time.Now().UnixMilli()-options.MaxInactivity.Milliseconds() {
-					storage.CloseWindow(x.Key, meta.Id)
-					items := storage.FlushWindow(x.Key, meta.Id)
-					if len(items) > 0 {
-						m.ExecNext(task.ToArray(x, items), next)
-					}
+					storage.CloseWindow(x.Key, meta.Id, options.Watermark, func(items []task.Message[T]) {
+						if len(items) > 0 {
+							m.ExecNext(task.ToArray(x, items), next)
+						}
+					})
 				}
 			})
 		} else { // window doesn't exist
@@ -74,11 +75,11 @@ func SessionWindow[T any](options SWOptions[T]) task.Operator[T, []T] {
 				meta := storage.GetWindowMetadata(x.Key, meta.Id)
 
 				if meta.End == 0 && meta.Last <= time.Now().UnixMilli()-options.MaxInactivity.Milliseconds() {
-					storage.CloseWindow(x.Key, meta.Id)
-					items := storage.FlushWindow(x.Key, meta.Id)
-					if len(items) > 0 {
-						m.ExecNext(task.ToArray(x, items), next)
-					}
+					storage.CloseWindow(x.Key, meta.Id, options.Watermark, func(items []task.Message[T]) {
+						if len(items) > 0 {
+							m.ExecNext(task.ToArray(x, items), next)
+						}
+					})
 				}
 			})
 
@@ -87,11 +88,11 @@ func SessionWindow[T any](options SWOptions[T]) task.Operator[T, []T] {
 				meta := storage.GetWindowMetadata(x.Key, meta.Id)
 
 				if meta.End == 0 {
-					storage.CloseWindow(x.Key, meta.Id)
-					items := storage.FlushWindow(x.Key, meta.Id)
-					if len(items) > 0 {
-						m.ExecNext(task.ToArray(x, items), next)
-					}
+					storage.CloseWindow(x.Key, meta.Id, options.Watermark, func(items []task.Message[T]) {
+						if len(items) > 0 {
+							m.ExecNext(task.ToArray(x, items), next)
+						}
+					})
 				}
 			}()
 		}

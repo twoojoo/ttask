@@ -14,9 +14,10 @@ import (
 //   - Size: 1 second
 //   - Hop: 2 seconds
 type TWOptions[T any] struct {
-	Id      string
-	Storage storage.Storage[task.Message[T]]
-	Size    time.Duration
+	Id        string
+	Storage   storage.Storage[task.Message[T]]
+	Size      time.Duration
+	Watermark time.Duration
 }
 
 func parseTWOptions[T any](o *TWOptions[T]) {
@@ -49,7 +50,7 @@ func TumblingWindow[T any](options TWOptions[T]) task.Operator[T, []T] {
 			go func() {
 				for range time.Tick(options.Size) {
 					now := time.Now().UnixMilli()
-					idsToFlush := []string{}
+					// idsToFlush := []string{}
 
 					keys := storage.GetKeys()
 
@@ -57,8 +58,13 @@ func TumblingWindow[T any](options TWOptions[T]) task.Operator[T, []T] {
 						meta := storage.GetWindowsMetadata(k)
 
 						for i := range meta {
-							storage.CloseWindow(k, meta[i].Id)
-							idsToFlush = append(idsToFlush, meta[i].Id)
+							storage.CloseWindow(x.Key, meta[i].Id, options.Watermark, func(items []task.Message[T]) {
+								if len(items) > 0 {
+									m.ExecNext(task.ToArray(x, items), next)
+								}
+							})
+
+							// idsToFlush = append(idsToFlush, meta[i].Id)
 						}
 
 						storage.StartNewEmptyWindow(k, now)
@@ -66,14 +72,14 @@ func TumblingWindow[T any](options TWOptions[T]) task.Operator[T, []T] {
 
 					first = false
 
-					for _, k := range keys {
-						for _, id := range idsToFlush {
-							items := storage.FlushWindow(k, id)
-							if len(items) > 0 {
-								m.ExecNext(task.ToArray(x, items), next)
-							}
-						}
-					}
+					// for _, k := range keys {
+					// 	for _, id := range idsToFlush {
+					// 		items := storage.FlushWindow(k, id)
+					// 		if len(items) > 0 {
+					// 			m.ExecNext(task.ToArray(x, items), next)
+					// 		}
+					// 	}
+					// }
 				}
 			}()
 		}

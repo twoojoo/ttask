@@ -14,10 +14,11 @@ import (
 //   - Size: 1 second
 //   - Hop: 2 seconds
 type HWOptions[T any] struct {
-	Id      string
-	Storage storage.Storage[task.Message[T]]
-	Size    time.Duration
-	Hop     time.Duration
+	Id        string
+	Storage   storage.Storage[task.Message[T]]
+	Size      time.Duration
+	Hop       time.Duration
+	Watermark time.Duration
 }
 
 func parseHWOptions[T any](o *HWOptions[T]) {
@@ -60,23 +61,26 @@ func HoppingWindow[T any](options HWOptions[T]) task.Operator[T, []T] {
 
 				for _, k := range keys {
 					meta := storage.GetWindowsMetadata(k)
-					idsToFlush := []string{}
+					// idsToFlush := []string{}
 
 					for i := range meta {
 						if meta[i].End == 0 && meta[i].Start <= (end-options.Size.Milliseconds()) {
-							storage.CloseWindow(k, meta[i].Id)
-							idsToFlush = append(idsToFlush, meta[i].Id)
+							storage.CloseWindow(x.Key, meta[i].Id, options.Watermark, func(items []task.Message[T]) {
+								if len(items) > 0 {
+									m.ExecNext(task.ToArray(x, items), next)
+								}
+							})
 						}
 					}
 
 					//fluhs only windows closed in this turn
-					for _, id := range idsToFlush {
-						items := storage.FlushWindow(k, id)
-						// log.Println("fglushin window", k, id, "len", len(items))
-						if len(items) > 0 {
-							m.ExecNext(task.ToArray(x, items), next)
-						}
-					}
+					// for _, id := range idsToFlush {
+					// 	items := storage.FlushWindow(k, id)
+					// 	// log.Println("fglushin window", k, id, "len", len(items))
+					// 	if len(items) > 0 {
+					// 		m.ExecNext(task.ToArray(x, items), next)
+					// 	}
+					// }
 				}
 			})
 		}
