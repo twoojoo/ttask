@@ -67,6 +67,7 @@ func CountingWindow[T any](options CWOptions[T]) task.Operator[T, []T] {
 		// start new inactivity check
 		if options.MaxInactivity > 0 && options.Size > 1 {
 			stopIncactivityCheckCh[x.Key] = startInactivityCheck(options.MaxInactivity, func() {
+				storage.CloseWindow(x.Key, meta[0].Id)
 				items := storage.FlushWindow(x.Key, meta[0].Id)
 				if len(items) > 0 {
 					m.ExecNext(task.ToArray(x, items), next)
@@ -84,7 +85,8 @@ func CountingWindow[T any](options CWOptions[T]) task.Operator[T, []T] {
 				}
 			}
 
-			items := (storage).FlushWindow(x.Key, meta[0].Id)
+			storage.CloseWindow(x.Key, meta[0].Id)
+			items := storage.FlushWindow(x.Key, meta[0].Id)
 			if len(items) > 0 {
 				m.ExecNext(task.ToArray(x, items), next)
 			}

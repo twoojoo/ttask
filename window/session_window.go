@@ -42,15 +42,21 @@ func SessionWindow[T any](options SWOptions[T]) task.Operator[T, []T] {
 	parseSWOptions(&options)
 	storage := storage.NewStorageInterface(&options.Storage)
 
+	stopIncactivityCheckCh := map[string]chan int{}
+
 	return func(m *task.Meta, x *task.Message[T], next *task.Step) {
 		meta := storage.GetWindowsMetadata(x.Key)
 		meta = filterClosedWindowMeta(meta)
 
+		//cancel last inactivity check
+		if stopIncactivityCheckCh[x.Key] != nil {
+			stopIncactivityCheckCh[x.Key] <- 1
+		}
+
 		if len(meta) > 0 { // window exists
 			storage.PushItemToWindow(x.Key, meta[0].Id, *x)
 
-			go func() {
-				time.Sleep(options.MaxInactivity)
+			stopIncactivityCheckCh[x.Key] = startInactivityCheck(options.MaxInactivity, func() {
 				meta := storage.GetWindowMetadata(x.Key, meta[0].Id)
 
 				if meta.End == 0 && meta.Last <= time.Now().UnixMilli()-options.MaxInactivity.Milliseconds() {
@@ -60,12 +66,11 @@ func SessionWindow[T any](options SWOptions[T]) task.Operator[T, []T] {
 						m.ExecNext(task.ToArray(x, items), next)
 					}
 				}
-			}()
+			})
 		} else { // window doesn't exist
 			meta := storage.StartNewWindow(x.Key, *x)
 
-			go func() {
-				time.Sleep(options.MaxInactivity)
+			stopIncactivityCheckCh[x.Key] = startInactivityCheck(options.MaxInactivity, func() {
 				meta := storage.GetWindowMetadata(x.Key, meta.Id)
 
 				if meta.End == 0 && meta.Last <= time.Now().UnixMilli()-options.MaxInactivity.Milliseconds() {
@@ -75,7 +80,7 @@ func SessionWindow[T any](options SWOptions[T]) task.Operator[T, []T] {
 						m.ExecNext(task.ToArray(x, items), next)
 					}
 				}
-			}()
+			})
 
 			go func() {
 				time.Sleep(options.MaxSize)
