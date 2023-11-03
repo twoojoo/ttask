@@ -40,7 +40,7 @@ import (
 
 ### Task
 
-The main abstraction of the library is the Task, wich is a set of ordered [operations](#operators) on a stream of data. Tasks can also be [chained and branched](#chaining-and-branching) in custom ways. 
+The main abstraction of the library is the Task, which is a set of ordered [operations](#operators) on a stream of data. Tasks can also be [chained and branched](#chaining-and-branching) in custom ways. 
 
 There are two types of task:
 
