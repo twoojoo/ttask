@@ -160,7 +160,7 @@ Chaining/branching tasks is done with some special operators that allow to bisec
 ```go
 // Chain another task to the current one syncronMapRawously.
 // Chaining a locked task will cause the application to panic.
-// The act of chaininga locks the chained task as if Lock() method was called.
+// The act of chaining locks the child task as if Lock() method was called.
 func Chain[O, T any](t *TTask[O, T]) 
 
 // Create an asyncronous branch from the current task using another task.
