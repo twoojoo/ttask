@@ -97,13 +97,13 @@ func WithEventTime[T any](extractor func(x T) time.Time)
 func Print[T any](prefix ...string) 
 
 // Map the message value.
-func Map[T, R any](cb func(x T) R) 
+func Map[T, R any](mapper func(x T) R) 
 
 // Filter messages.
-func Filter[T, R any](cb func(x T) bool) 
+func Filter[T, R any](filter func(x T) bool) 
 
 // Perform an action for the message.
-func Tap[T any](cb func(x T)) 
+func Tap[T any](action func(x T)) 
 
 // Delay the next task step.
 func Delay[T any](d time.Duration) 
@@ -114,12 +114,12 @@ func Delay[T any](d time.Duration)
 > for array operators, the generic type refers to the type of the elements of the array
 
 ```go
-func MapArray[T, R any](cb func(x T) R) 
+func MapArray[T, R any](mapper func(x T) R) 
 
 // Execute an action for each element of the array
-func ForEach[T any](cb func(x T)) 
+func ForEach[T any](action func(x T)) 
 
-func FilterArray[T any](cb func(x T) bool)
+func FilterArray[T any](filter func(x T) bool)
 
 // JS-like array reducer
 func ReduceArray[T, R any](base R, reducer func(acc *R, x T) R)
@@ -193,7 +193,7 @@ func ParallelizeArray[T any]()
 Most operators have a so called **raw** version, meaning that it give access to lower level task resources, namely *task inner methods and properties* and *message metadata*. For example the Tap operator has its own raw version:
 
 ```go
-func TapRaw[T any](cb func(i *Inner, x *Message[T])) 
+func TapRaw[T any](action func(i *Inner, x *Message[T])) 
 ```
 
 #### Task meta
