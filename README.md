@@ -28,7 +28,7 @@ Working examples in the [examples](./examples) folder.
 
 ### Importing
 
-Even if it's not idiomatic, I suggest to import ttask packages in this way, otherwise your code will end up being a bit too verbose.
+Even if it's not idiomatic, I suggest to import ttask packages in this way, otherwise your code will end up being a bit too verbose (golint will complain).
 
 ```go
 import (
