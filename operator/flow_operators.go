@@ -99,6 +99,7 @@ func BranchSwitch[T any](t *task.TTask[T, T], filter func(x T) bool) task.Operat
 	}
 }
 
+// Process n messages in parallel using an in-memory buffer
 func Parallelize[T any](n int) task.Operator[T, T] {
 	cache := []*task.Message[T]{}
 	ch := make(chan int, n)

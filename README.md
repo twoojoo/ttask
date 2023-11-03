@@ -120,14 +120,14 @@ func FilterArray[T any](cb func(x T) bool)
 #### Context operators
 
 ```go
-//Cache a key/value record in the Task context. Use an extractor function to pull the value from the processed item.
+// Cache a key/value record in the Task context. Use an extractor function to pull the value from the processed item.
 func WithContextValue[T any](k any, ext func(x T) any) 
 ```
 
 #### Kafka operators
 
 ```go
-//Perform a commit on the current kafka message.
+// Perform a commit on the current kafka message.
 func KafkaCommit[T any](consumer *kafka.Consumer, logger bool) Operator[types.KafkaMessage[T], types.KafkaMessage[T]]
 ```
 
@@ -159,11 +159,14 @@ func Chain[O, T any](t *TTask[O, T])
 // An already locked task can be used as child task when branching.
 func Branch[T any](t *TTask[T, T]) 
 
-//Similar to the Branch operator, but redirects to the new task only messages that pass the provided filter
+// Similar to the Branch operator, but redirects to the new task only messages that pass the provided filter
 func BranchWhere[T any](t *TTask[T, T], filter func(x T) bool) 
 
-//Similar to the BranchWhere operator, but messages will either pass to the new branch or continue in the current one
+// Similar to the BranchWhere operator, but messages will either pass to the new branch or continue in the current one
 func BranchSwitch[T any](t *TTask[T, T], filter func(x T) bool) 
+
+// Process n messages in parallel using an in-memory buffer
+func Parallelize[T any](n int)
 ```
 
 ### Raw operators
