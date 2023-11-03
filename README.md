@@ -212,4 +212,6 @@ Here's what's happpening:
 
 #### Custom operators
 
-TBD
+Custom operators (as well as sources and sinks) can be built starting from the **MapRaw** operator.
+
+You can find an example [here](./examples/custom/main.go)
