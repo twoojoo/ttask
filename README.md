@@ -178,7 +178,7 @@ TBD
 
 #### Error handling
 
-When the logic of your operator's callback is error prone, it's highly suggested to use the raw version of that operator, since it gives acess to the enbedded error handling throgh the Task inner API.
+When the logic of your operator's callback is error prone, it's highly suggested to use the raw version of that operator, since it gives acess to the embedded error handling throgh the Task inner API.
 
 ```go
 t := T(T(T(
