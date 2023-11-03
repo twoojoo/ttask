@@ -229,7 +229,7 @@ Here's what's happpening:
 - the error is passed to the **Error** function of the task APi
 - the function returns a 0 (it could be any int value, it will be discarded)
 - the error will be catched by the catcher callback passed to the Catch method of the task
-- in this case the process will stop
+- **the task won't continue** to the following operators
 
 > **⚠** if the catcher callback is not set, the error will be raised, but it will be ignored
 
