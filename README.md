@@ -232,7 +232,7 @@ Here's what's happpening:
 - the error will be catched by the catcher callback passed to the Catch method of the task
 - **the task won't continue** to the following operators
 
-> **⚠** if the catcher callback is not set, the error will be raised, but it will be ignored
+**⚠** if the catcher callback is not set, the error will be raised, but it will be ignored
 
 #### Custom operators
 
