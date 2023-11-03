@@ -2,8 +2,11 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
+	"math/rand"
 	"strconv"
+	"time"
 
 	. "github.com/twoojoo/ttask/operator"
 	. "github.com/twoojoo/ttask/source"
@@ -36,4 +39,24 @@ func main() {
 		log.Fatal(e)
 	}).Run(ctx)
 
+	fmt.Println("-----------------")
+
+	T(T(
+		FromItem("iterate-array-example", []int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}),
+		IterateArray[int]()),
+		Print[int]("order >"),
+	).Catch(func(i *Inner, e error) {
+		log.Fatal(e)
+	}).Run(ctx)
+
+	fmt.Println("-----------------")
+
+	T(T(T(
+		FromItem("parallelize-array-example", []int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}),
+		ParallelizeArray[int]()),
+		Delay[int](time.Duration(rand.Intn(100))*time.Millisecond)),
+		Print[int]("chaos >"),
+	).Catch(func(i *Inner, e error) {
+		log.Fatal(e)
+	}).Run(ctx)
 }
