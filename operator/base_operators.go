@@ -160,3 +160,38 @@ func Branch[T any](t *task.TTask[T, T]) task.Operator[T, T] {
 	}
 }
 
+
+//Similar to the Branch operator, but redirects to the new task only messages that pass the provided filter
+func BranchWhere[T any](t *task.TTask[T, T], filter func(x T) bool) task.Operator[T, T] {
+	t.Lock()
+
+	return func(m *task.Meta, x *task.Message[T], next *task.Step) {
+		msgCopy := *x
+
+		if filter(x.Value) {
+			go func() {
+				t.InjectRaw(m.Context, &msgCopy)
+			}()
+		}
+
+		m.ExecNext(x, next)
+	}
+}
+
+//Similar to the BranchWhere operator, but messages will either pass to the new branch or continue in the current one
+func BranchSwitch[T any](t *task.TTask[T, T], filter func(x T) bool) task.Operator[T, T] {
+	t.Lock()
+
+	return func(m *task.Meta, x *task.Message[T], next *task.Step) {
+		msgCopy := *x
+
+		if filter(x.Value) {
+			go func() {
+				t.InjectRaw(m.Context, &msgCopy)
+			}()
+		} else {
+
+			m.ExecNext(x, next)
+		}
+	}
+}
