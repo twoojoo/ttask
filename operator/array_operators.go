@@ -114,3 +114,32 @@ func flatArray[T any](arr *[][]T) []T {
 
 	return flatten
 }
+
+// Continue the task execution for each element of the array synchronously
+func IterateArray[T any]() task.Operator[[]T, T] {
+	return func(m *task.Inner, x *task.Message[[]T], next *task.Step) {
+		for i := 0; i < len(x.Value); i++ {
+			m.ExecNext(task.ReplaceValue(x, x.Value[i]), next)
+		}
+	}
+}
+
+// Continue the task exection for each element of the array asynchronously
+func ParallelizeArray[T any]() task.Operator[[]T, T] {
+	return func(m *task.Inner, x *task.Message[[]T], next *task.Step) {
+		ch := make(chan struct{}, len(x.Value))
+
+		for i := 0; i < len(x.Value); i++ {
+			c := *&i
+			go func() {
+				m.ExecNext(task.ReplaceValue(x, x.Value[c]), next)
+				ch <- struct{}{}
+			}()
+		}
+
+		//wait for all the iterations to complete
+		for i := 0; i < len(x.Value); i++ {
+			<-ch
+		}
+	}
+}

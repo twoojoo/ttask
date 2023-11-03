@@ -110,6 +110,8 @@ func Delay[T any](d time.Duration)
 
 #### Array operators
 
+> for array operators, the generic type refers to the type of the elements of the array
+
 ```go
 func MapArray[T, R any](cb func(x T) R) 
 
@@ -175,6 +177,12 @@ func BranchSwitch[T any](t *TTask[T, T], filter func(x T) bool)
 
 // Process n messages in parallel using an in-memory buffer
 func Parallelize[T any](n int)
+
+// Continue the task execution for each element of the array synchronously
+func IterateArray[T any]() {
+
+// Continue the task exection for each element of the array asynchronously
+func ParallelizeArray[T any]()
 ```
 
 ### Raw operators

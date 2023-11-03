@@ -102,7 +102,7 @@ func BranchSwitch[T any](t *task.TTask[T, T], filter func(x T) bool) task.Operat
 // Process n messages in parallel using an in-memory buffer
 func Parallelize[T any](n int) task.Operator[T, T] {
 	cache := []*task.Message[T]{}
-	ch := make(chan int, n)
+	ch := make(chan struct{}, n)
 
 	return func(m *task.Inner, x *task.Message[T], next *task.Step) {
 		cache = append(cache, x)
@@ -113,14 +113,16 @@ func Parallelize[T any](n int) task.Operator[T, T] {
 
 				go func() {
 					m.ExecNext(msgCp, next)
+					ch <- struct{}{}
 				}()
 			}
 
+			//wait for all the iterations to complete
 			for i := 0; i < n; i++ {
 				<-ch
 			}
 
-			ch = make(chan int, n)
+			ch = make(chan struct{}, n)
 		}
 	}
 }
