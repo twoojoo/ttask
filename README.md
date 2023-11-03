@@ -184,7 +184,7 @@ When the logic of your operator's callback is error prone, it's highly suggested
 t := T(T(T(
 	Injectable[string]("t1"),
 	Delay[string](time.Second)),
-	TapRaw(func (m *Inner, x Message[string]) int {
+	MapRaw(func (m *Inner, x Message[string]) int {
 		num, err := strconv.Atoi(x)
 		if err != nil {
 			m.Error(err)
