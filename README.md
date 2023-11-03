@@ -59,7 +59,7 @@ t := T(T(T(
 		log.Fatal(e)
 	}).Lock()
 
-err := t.Inject(context.Background(), "msg")
+err := t.Inject(context.Background(), 123)
 ```
 
 > NOTE: if the operator can't infer the message type from a given callback (e.g. Map operator), the type must be provided as generic to the operator itself (e.g. Print and Delay operators) 
