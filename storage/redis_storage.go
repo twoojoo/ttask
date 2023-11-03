@@ -2,6 +2,7 @@ package storage
 
 import (
 	"context"
+	"strings"
 
 	"github.com/redis/go-redis/v9"
 	"github.com/twoojoo/ttask/task"
@@ -10,7 +11,7 @@ import (
 func Redis[T any](id string, redis *redis.Client) *RedisStorage[task.Message[T]] {
 	return &RedisStorage[task.Message[T]]{
 		client: redis,
-		id: id,
+		id:     id,
 	}
 }
 
@@ -30,7 +31,14 @@ func (s RedisStorage[T]) redisWinK(k string, id string) string {
 func (s *RedisStorage[T]) GetKeys() []string {
 	keys := []string{}
 
-	s.client.Keys(context.Background(), s.id+".k.*")
+	results, err := s.client.Keys(context.Background(), s.id+".k.*").Result()
+	if err != nil {
+		panic(err)
+	}
+
+	for i := range results {
+		keys = append(keys, strings.Split(results[i], s.id+".k.")[1])
+	}
 
 	return keys
 }
