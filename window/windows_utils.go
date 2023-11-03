@@ -12,7 +12,6 @@ func assignMessageToWindows[T any](
 	meta []storage.WindowMeta,
 	item *task.Message[T],
 	messageTime time.Time,
-	// watermark time.Duration,
 ) []storage.WindowMeta {
 	m := []storage.WindowMeta{}
 	t := messageTime.UnixMilli()
