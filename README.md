@@ -111,7 +111,7 @@ func Delay[T any](d time.Duration)
 
 #### Array operators
 
-> for array operators, the generic type refers to the type of the elements of the array
+**note**: for array operators, the generic type refers to the type of the elements of the array
 
 ```go
 func MapArray[T, R any](cb func(x T) R) 
