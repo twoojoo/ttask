@@ -3,41 +3,9 @@ package window
 import (
 	"time"
 
-	"github.com/google/uuid"
 	"github.com/twoojoo/ttask/storage"
 	"github.com/twoojoo/ttask/task"
 )
-
-// Defaults:
-//   - Storage: memory (no persistence)
-//   - Id: random uuid
-//   - Size: 1 second
-//   - Hop: 2 seconds
-type HWOptions[T any] struct {
-	Id        string
-	Storage   storage.Storage[task.Message[T]]
-	Size      time.Duration
-	Hop       time.Duration
-	Watermark time.Duration
-}
-
-func parseHWOptions[T any](o *HWOptions[T]) {
-	if o.Storage == nil {
-		o.Storage = storage.Memory[T]()
-	}
-
-	if o.Id == "" {
-		o.Id = uuid.New().String()
-	}
-
-	if o.Size == 0 {
-		o.Size = 1 * time.Second
-	}
-
-	if o.Hop == 0 {
-		o.Hop = 2 * time.Second
-	}
-}
 
 func HoppingWindow[T any](options HWOptions[T]) task.Operator[T, []T] {
 	parseHWOptions(&options)
@@ -85,6 +53,8 @@ func HoppingWindow[T any](options HWOptions[T]) task.Operator[T, []T] {
 		}
 
 		meta := storage.GetWindowsMetadata(x.Key)
+		mt := getMessageTime(options.WindowingTime, x)
+		meta = assignMessageToWindows(meta, x, mt)
 
 		// if no window for this key, just create 1 with the last start ts
 		if len(meta) == 0 && !first {
@@ -95,7 +65,6 @@ func HoppingWindow[T any](options HWOptions[T]) task.Operator[T, []T] {
 			// push item to all windows for that key that are not closed yet
 			for _, m := range meta {
 				if m.End == 0 {
-					// log.Printf("pushing %v to %s\n", x.Value, m.Id)
 					storage.PushItemToWindow(x.Key, m.Id, *x)
 				}
 

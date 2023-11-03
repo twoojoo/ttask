@@ -3,36 +3,9 @@ package window
 import (
 	"time"
 
-	"github.com/google/uuid"
 	"github.com/twoojoo/ttask/storage"
 	"github.com/twoojoo/ttask/task"
 )
-
-// Defaults:
-//   - Storage: memory (no persistence)
-//   - Id: random uuid
-//   - Size: 1 second
-//   - Hop: 2 seconds
-type TWOptions[T any] struct {
-	Id        string
-	Storage   storage.Storage[task.Message[T]]
-	Size      time.Duration
-	Watermark time.Duration
-}
-
-func parseTWOptions[T any](o *TWOptions[T]) {
-	if o.Storage == nil {
-		o.Storage = storage.Memory[T]()
-	}
-
-	if o.Id == "" {
-		o.Id = uuid.New().String()
-	}
-
-	if o.Size == 0 {
-		o.Size = 1 * time.Second
-	}
-}
 
 // TumblingWindow:
 //
@@ -41,6 +14,7 @@ func parseTWOptions[T any](o *TWOptions[T]) {
 // [-------------][-------------][-------------][-----
 func TumblingWindow[T any](options TWOptions[T]) task.Operator[T, []T] {
 	parseTWOptions(&options)
+
 	storage := storage.NewStorageInterface(&options.Storage)
 
 	first := true
@@ -62,23 +36,12 @@ func TumblingWindow[T any](options TWOptions[T]) task.Operator[T, []T] {
 									m.ExecNext(task.ToArray(x, items), next)
 								}
 							})
-
-							// idsToFlush = append(idsToFlush, meta[i].Id)
 						}
 
 						storage.StartNewEmptyWindow(k, now)
 					}
 
 					first = false
-
-					// for _, k := range keys {
-					// 	for _, id := range idsToFlush {
-					// 		items := storage.FlushWindow(k, id)
-					// 		if len(items) > 0 {
-					// 			m.ExecNext(task.ToArray(x, items), next)
-					// 		}
-					// 	}
-					// }
 				}
 			}()
 		}
@@ -90,7 +53,8 @@ func TumblingWindow[T any](options TWOptions[T]) task.Operator[T, []T] {
 		}
 
 		meta := storage.GetWindowsMetadata(x.Key)
-		meta = filterClosedWindowMeta(meta)
+		mt := getMessageTime(options.WindowingTime, x)
+		meta = assignMessageToWindows(meta, x, mt)
 
 		if len(meta) == 0 {
 			storage.StartNewWindow(x.Key, *x)

@@ -3,41 +3,9 @@ package window
 import (
 	"time"
 
-	"github.com/google/uuid"
 	"github.com/twoojoo/ttask/storage"
 	"github.com/twoojoo/ttask/task"
 )
-
-// Defaults:
-//   - Storage: memory (no persistence)
-//   - Id: random uuid
-//   - MaxInactivity: 1 second
-//   - MaxSize: MaxInactivity * 2
-type SWOptions[T any] struct {
-	Id            string
-	Storage       storage.Storage[task.Message[T]]
-	MaxSize       time.Duration
-	MaxInactivity time.Duration
-	Watermark     time.Duration
-}
-
-func parseSWOptions[T any](o *SWOptions[T]) {
-	if o.Storage == nil {
-		o.Storage = storage.Memory[T]()
-	}
-
-	if o.Id == "" {
-		o.Id = uuid.New().String()
-	}
-
-	if o.MaxInactivity == 0 {
-		o.MaxInactivity = 1 * time.Second
-	}
-
-	if o.MaxSize == 0 {
-		o.MaxSize = 2 * o.MaxInactivity
-	}
-}
 
 func SessionWindow[T any](options SWOptions[T]) task.Operator[T, []T] {
 	parseSWOptions(&options)
@@ -47,7 +15,8 @@ func SessionWindow[T any](options SWOptions[T]) task.Operator[T, []T] {
 
 	return func(m *task.Meta, x *task.Message[T], next *task.Step) {
 		meta := storage.GetWindowsMetadata(x.Key)
-		meta = filterClosedWindowMeta(meta)
+		mt := getMessageTime(options.WindowingTime, x)
+		meta = assignMessageToWindows(meta, x, mt)
 
 		//cancel last inactivity check
 		if stopIncactivityCheckCh[x.Key] != nil {
