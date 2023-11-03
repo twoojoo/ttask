@@ -243,6 +243,7 @@ You can find an example [here](./examples/custom/main.go)
 ### Next steps
 
 - fill up the readme file with missing stuff (windows, storage, etc..)
+- better Memory storage with mutexes
 - write a Redis storage for windows operators
 - write a Rocksdb storage for windows operators
 - write a Cassandra storage for windows operators
