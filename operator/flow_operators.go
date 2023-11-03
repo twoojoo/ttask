@@ -10,7 +10,7 @@ import (
 func Delay[T any](d time.Duration) task.Operator[T, T] {
 	return func(inner *task.Inner, x *task.Message[T], next *task.Step) {
 		time.Sleep(d)
-		m.ExecNext(x, next)
+		inner.ExecNext(x, next)
 	}
 }
 
@@ -25,24 +25,24 @@ func Chain[O, T any](t *task.TTask[O, T]) task.Operator[O, T] {
 	return func(inner *task.Inner, x *task.Message[O], next *task.Step) {
 		go func() {
 			chainCh <- chainInfo{
-				metaPtr: m,
-				nextPtr: next,
+				innerPtr: inner,
+				nextPtr:  next,
 			}
 		}()
 
-		t.InjectRaw(m.Context, x)
+		t.InjectRaw(inner.Context, x)
 	}
 }
 
 type chainInfo struct {
-	metaPtr *task.Inner
-	nextPtr *task.Step
+	innerPtr *task.Inner
+	nextPtr  *task.Step
 }
 
 func chain[T any](ch chan chainInfo) task.Operator[T, T] {
 	return TapRaw(func(inner *task.Inner, x *task.Message[T]) {
 		chainInfo := <-ch
-		chainInfo.metaPtr.ExecNext(x, chainInfo.nextPtr)
+		chainInfo.innerPtr.ExecNext(x, chainInfo.nextPtr)
 	})
 }
 
@@ -57,10 +57,10 @@ func Branch[T any](t *task.TTask[T, T]) task.Operator[T, T] {
 		msgCopy := *x
 
 		go func() {
-			t.InjectRaw(m.Context, &msgCopy)
+			t.InjectRaw(inner.Context, &msgCopy)
 		}()
 
-		m.ExecNext(x, next)
+		inner.ExecNext(x, next)
 	}
 }
 
@@ -73,11 +73,11 @@ func BranchWhere[T any](t *task.TTask[T, T], filter func(x T) bool) task.Operato
 
 		if filter(x.Value) {
 			go func() {
-				t.InjectRaw(m.Context, &msgCopy)
+				t.InjectRaw(inner.Context, &msgCopy)
 			}()
 		}
 
-		m.ExecNext(x, next)
+		inner.ExecNext(x, next)
 	}
 }
 
