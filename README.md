@@ -211,7 +211,7 @@ t := T(T(T(
 	MapRaw(func (i *Inner, x Message[string]) int {
 		num, err := strconv.Atoi(x)
 		if err != nil {
-			m.Error(err)
+			i.Error(err)
 			return 0
 		}
 
