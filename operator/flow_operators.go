@@ -17,7 +17,12 @@ func Delay[T any](d time.Duration) task.Operator[T, T] {
 // Chain another task to the current one syncronously.
 // Chaining a locked task will cause the application to panic.
 // The act of chaininga locks the chained task as if Lock() method was called.
+// The child task must be an injectable task, otherwise the process will panic.
 func Chain[O, T any](t *task.TTask[O, T]) task.Operator[O, T] {
+	if !t.IsInjectable() {
+		panic("TTask error: cannot use a non injectable task in  a Branch operator")
+	}
+
 	chainCh := make(chan chainInfo)
 	task.T(t, chain[T](chainCh))
 	t.Lock()
@@ -50,8 +55,13 @@ func chain[T any](ch chan chainInfo) task.Operator[T, T] {
 // When branching, the parent task and the child task will continue their flow concurrently.
 // Branching a task will cause the child task to be locked as if Lock() method was called.
 // An already locked task can be used as child task when branching.
+// The child task must be an injectable task, otherwise the process will panic.
 func Branch[T any](t *task.TTask[T, T]) task.Operator[T, T] {
 	t.Lock()
+
+	if !t.IsInjectable() {
+		panic("TTask error: cannot use a non injectable task in  a Branch operator")
+	}
 
 	return func(inner *task.Inner, x *task.Message[T], next *task.Step) {
 		msgCopy := *x
@@ -67,6 +77,10 @@ func Branch[T any](t *task.TTask[T, T]) task.Operator[T, T] {
 // Similar to the Branch operator, but redirects to the new task only messages that pass the provided filter
 func BranchWhere[T any](t *task.TTask[T, T], filter func(x T) bool) task.Operator[T, T] {
 	t.Lock()
+
+	if !t.IsInjectable() {
+		panic("TTask error: cannot use a non injectable task in  a BranchWhere operator")
+	}
 
 	return func(inner *task.Inner, x *task.Message[T], next *task.Step) {
 		msgCopy := *x
@@ -85,6 +99,10 @@ func BranchWhere[T any](t *task.TTask[T, T], filter func(x T) bool) task.Operato
 func BranchSwitch[T any](t *task.TTask[T, T], filter func(x T) bool) task.Operator[T, T] {
 	t.Lock()
 
+	if !t.IsInjectable() {
+		panic("TTask error: cannot use a non injectable task in  a BranchSwitch operator")
+	}
+
 	return func(inner *task.Inner, x *task.Message[T], next *task.Step) {
 		msgCopy := *x
 
@@ -93,7 +111,6 @@ func BranchSwitch[T any](t *task.TTask[T, T], filter func(x T) bool) task.Operat
 				t.InjectRaw(inner.Context, &msgCopy)
 			}()
 		} else {
-
 			inner.ExecNext(x, next)
 		}
 	}

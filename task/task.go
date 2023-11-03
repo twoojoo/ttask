@@ -93,6 +93,10 @@ func T[O, T, R any](t *TTask[O, T], operator Operator[T, R]) *TTask[O, R] {
 	}
 }
 
+func (t TTask[O, T]) IsInjectable() bool {
+	return t.injectable
+}
+
 type Operator[T, R any] func(t *Inner, x *Message[T], next *Step)
 
 type Step struct {
