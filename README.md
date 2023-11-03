@@ -179,7 +179,7 @@ func BranchSwitch[T any](t *TTask[T, T], filter func(x T) bool)
 func Parallelize[T any](n int)
 
 // Continue the task execution for each element of the array synchronously
-func IterateArray[T any]() {
+func IterateArray[T any]()
 
 // Continue the task exection for each element of the array asynchronously
 func ParallelizeArray[T any]()
