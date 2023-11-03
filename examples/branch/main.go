@@ -14,7 +14,7 @@ func main() {
 		Injectable[string]("t2"),
 		Delay[string](time.Second)),
 		Print[string]("> third:"),
-	).Catch(func(m *Meta, e error) {
+	).Catch(func(m *Inner, e error) {
 		log.Fatal(e)
 	}).Lock()
 
@@ -23,7 +23,7 @@ func main() {
 		Print[string]("> first:")),
 		Branch[string](branch)),
 		Print[string]("> second:"),
-	).Catch(func(m *Meta, e error) {
+	).Catch(func(m *Inner, e error) {
 		log.Fatal(e)
 	}).Lock()
 

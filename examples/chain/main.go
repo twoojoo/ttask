@@ -15,7 +15,7 @@ func main() {
 		Map(func(x string) int {
 			return 123
 		}),
-	).Catch(func(m *Meta, e error) {
+	).Catch(func(m *Inner, e error) {
 		log.Fatal(e)
 	})
 
@@ -24,7 +24,7 @@ func main() {
 		Print[string]("> first:")),
 		Chain(chained)),
 		Print[int]("> third:"),
-	).Catch(func(m *Meta, e error) {
+	).Catch(func(m *Inner, e error) {
 		log.Fatal(e)
 	}).Lock()
 

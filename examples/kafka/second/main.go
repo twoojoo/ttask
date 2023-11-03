@@ -38,7 +38,7 @@ func main() {
 	T(
 		FromKafka("t1", c1, true, time.Minute),
 		KafkaCommit[[]byte](c1, true),
-	).Catch(func(m *Meta, e error) {
+	).Catch(func(m *Inner, e error) {
 		log.Fatal(e)
 	}).Run(context.Background())
 

@@ -21,7 +21,7 @@ func main() {
 			MaxInactivity: 1000 * time.Millisecond,
 		})),
 		Print[[]string](">"),
-	).Catch(func(m *Meta, e error) {
+	).Catch(func(m *Inner, e error) {
 		log.Fatal(e)
 	}).Run(context.Background())
 
@@ -35,7 +35,7 @@ func main() {
 			MaxInactivity: 700 * time.Millisecond,
 		})),
 		Print[[]int](">"),
-	).Catch(func(m *Meta, e error) {
+	).Catch(func(m *Inner, e error) {
 		log.Fatal(e)
 	}).Run(context.Background())
 
@@ -46,7 +46,7 @@ func main() {
 			MaxInactivity: 1010 * time.Millisecond,
 		})),
 		Print[[]int](">"),
-	).Catch(func(m *Meta, e error) {
+	).Catch(func(m *Inner, e error) {
 		log.Fatal(e)
 	}).Run(context.Background())
 

@@ -11,7 +11,7 @@ import (
 
 // generate a custom operator that use custom params
 func customOperator(toSum int) Operator[string, int] {
-	return MapRaw[string, int](func(m *Meta, x *Message[string]) int {
+	return MapRaw[string, int](func(m *Inner, x *Message[string]) int {
 		// opertator logic start:
 
 		num, err := strconv.Atoi(x.Value)
@@ -37,7 +37,7 @@ func customSource(taskId string, end int) *TTask[any, string] {
 
 //define custom source logic
 func customSourceLogic (end int) Operator[any, string] {
-	 return func(m *Meta, _ *Message[any], next *Step) {
+	 return func(m *Inner, _ *Message[any], next *Step) {
 		for i := 0; i < end; i++ {
 			num := i*i
 			val := strconv.Itoa(num)
@@ -53,7 +53,7 @@ func main() {
 		Print[string]("string >")),
 		customOperator(2)),
 		Print[int]("integer >"),
-	).Catch(func(m *Meta, e error) {
+	).Catch(func(m *Inner, e error) {
 		log.Fatal(e)
 	}).Run(context.Background())
 }

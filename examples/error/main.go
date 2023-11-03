@@ -20,14 +20,14 @@ func main() {
 			log.Println("extrancting ctx value... - " + count)
 			return x + " (put in ctx) - " + count
 		})),
-		TapRaw(func(m *Meta, _ *Message[string]) {
+		TapRaw(func(m *Inner, _ *Message[string]) {
 			log.Println(m.Context.Value("k1").(string))
 		})),
-		TapRaw(func(m *Meta, x *Message[string]) {
+		TapRaw(func(m *Inner, x *Message[string]) {
 			err := errors.New("I wanted to throw this error - " + count)
 			m.Error(err, "TapRaw:", x.Key, "-")
 		}),
-	).Catch(func(m *Meta, e error) {
+	).Catch(func(m *Inner, e error) {
 		val := m.Context.Value("k1").(string)
 		log.Println("ctx value was:", val)
 		log.Printf("[%s] error at %s", m.TaskID(), e.Error())
