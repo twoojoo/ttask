@@ -116,6 +116,12 @@ func MapArray[T, R any](cb func(x T) R)
 func Each[T any](cb func(x T)) 
 
 func FilterArray[T any](cb func(x T) bool)
+
+// JS-like array reducer
+func ReduceArray[T, R any](base R, reducer func(acc *R, x T) R)
+
+// Flattens an array of type [][]T
+func FlatArray[T any]()
 ```
 
 #### Context operators
