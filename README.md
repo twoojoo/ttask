@@ -25,6 +25,7 @@ Working examples in the [examples](./examples) folder.
 	- [Task meta](#task-meta)
 	- [Error handling](#error-handling)
 	- [Custom operators](#custom-operators)
+- [Next steps](#next-steps)
 
 ### Importing
 
@@ -238,3 +239,11 @@ Here's what's happpening:
 Custom operators (as well as sources and sinks) can be built starting from the **MapRaw** operator.
 
 You can find an example [here](./examples/custom/main.go)
+
+### Next steps
+
+- fill up the readme file with missing stuff (windows, storage, etc..)
+- write a Redis storage for windows operators
+- write a Rocksdb storage for windows operators
+- write a Cassandra storage for windows operators
+- improve persistence/recovery in the task (maybe enhancing storage systems)
