@@ -247,3 +247,4 @@ You can find an example [here](./examples/custom/main.go)
 - write a Rocksdb storage for windows operators
 - write a Cassandra storage for windows operators
 - improve persistence/recovery in the task (maybe enhancing storage systems)
+- add WithTimeout and WithDeadline context operators
