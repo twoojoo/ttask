@@ -15,6 +15,7 @@ Working examples in the [examples](./examples) folder.
 - [Sources](#sources)
 - [Sinks](#sinks)
 - [Operators](#operators)
+- [Tasl flow](#task-flow)
 - [Windowing](#windowing)
 	- [Tumbling window](#tumbling-window)
 	- [Hopping window](#hopping-window)
@@ -42,7 +43,7 @@ import (
 
 ### Task
 
-The main abstraction of the library is the Task, which is a set of ordered [operations](#operators) on a stream of data. Tasks can also be [chained and branched](#chaining-and-branching) in custom ways. 
+The main abstraction of the library is the Task, which is a set of ordered [operations](#operators) on a stream of data. Tasks can also be [chained and branched](#task-flow) in custom ways. 
 
 There are two types of task:
 
@@ -143,7 +144,7 @@ TBD
 
 #### Counting window
 
-### Chaining and branching
+### Task flow
 
 Chaining/branching tasks is done with some special operators that allow to bisec the task in different ways.
 
