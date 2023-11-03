@@ -227,7 +227,7 @@ t.Inject(context.Background(), "abc")
 
 Here's what's happpening:
 - since the injected message isn't a numeric string, the Atoi function will return an error
-- the error is passed to the **Error** function of the task APi
+- the error is passed to the **Error** function of the task inner API
 - the function returns a 0 (it could be any int value, it will be discarded)
 - the error will be catched by the catcher callback passed to the Catch method of the task
 - **the task won't continue** to the following operators
