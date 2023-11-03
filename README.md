@@ -247,6 +247,8 @@ You can find an example [here](./examples/custom/main.go)
 - write a Redis storage for windows operators
 - write a Rocksdb storage for windows operators
 - write a Cassandra storage for windows operators
-- improve persistence/recovery in the task (maybe enhancing storage systems)
+- improve persistence/recovery in the task
+	- maybe enhancing storage systems
+	- using checkpoints (e.g. Checkpoint(Map(func (..) { ...})))
 - add WithTimeout and WithDeadline context operators
 - add more sources and sinks (e.g. CSV, RabbitMQ, Apache Pulsar, etc..)
