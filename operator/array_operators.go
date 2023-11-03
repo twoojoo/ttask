@@ -5,51 +5,51 @@ import (
 )
 
 func MapArray[T, R any](cb func(x T) R) task.Operator[[]T, []R] {
-	return func(m *task.Inner, x *task.Message[[]T], next *task.Step) {
+	return func(inner *task.Inner, x *task.Message[[]T], next *task.Step) {
 		mapped := make([]R, len(x.Value))
 
 		for i := 0; i < len(x.Value); i++ {
 			mapped[i] = cb(x.Value[i])
 		}
 
-		m.ExecNext(task.ReplaceValue(x, mapped), next)
+		inner.ExecNext(task.ReplaceValue(x, mapped), next)
 	}
 }
 
-func MapArrayRaw[T, R any](cb func(m *task.Inner, x *task.Message[T]) R) task.Operator[[]T, []R] {
-	return func(m *task.Inner, x *task.Message[[]T], next *task.Step) {
+func MapArrayRaw[T, R any](cb func(inner *task.Inner, x *task.Message[T]) R) task.Operator[[]T, []R] {
+	return func(inner *task.Inner, x *task.Message[[]T], next *task.Step) {
 		mapped := make([]R, len(x.Value))
 
 		for i := 0; i < len(x.Value); i++ {
-			mapped[i] = cb(m, task.ReplaceValue(x, x.Value[i]))
+			mapped[i] = cb(inner, task.ReplaceValue(x, x.Value[i]))
 		}
 
-		m.ExecNext(task.ReplaceValue(x, mapped), next)
+		inner.ExecNext(task.ReplaceValue(x, mapped), next)
 	}
 }
 
 func ForEach[T any](cb func(x T)) task.Operator[[]T, []T] {
-	return func(m *task.Inner, x *task.Message[[]T], next *task.Step) {
+	return func(inner *task.Inner, x *task.Message[[]T], next *task.Step) {
 		for i := 0; i < len(x.Value); i++ {
 			cb(x.Value[i])
 		}
 
-		m.ExecNext(x, next)
+		inner.ExecNext(x, next)
 	}
 }
 
-func EachRaw[T, R any](cb func(m *task.Inner, x *task.Message[T]) R) task.Operator[[]T, []R] {
-	return func(m *task.Inner, x *task.Message[[]T], next *task.Step) {
+func EachRaw[T, R any](cb func(inner *task.Inner, x *task.Message[T]) R) task.Operator[[]T, []R] {
+	return func(inner *task.Inner, x *task.Message[[]T], next *task.Step) {
 		for i := 0; i < len(x.Value); i++ {
-			cb(m, task.ReplaceValue(x, x.Value[i]))
+			cb(inner, task.ReplaceValue(x, x.Value[i]))
 		}
 
-		m.ExecNext(x, next)
+		inner.ExecNext(x, next)
 	}
 }
 
 func FilterArray[T any](cb func(x T) bool) task.Operator[[]T, []T] {
-	return func(m *task.Inner, x *task.Message[[]T], next *task.Step) {
+	return func(inner *task.Inner, x *task.Message[[]T], next *task.Step) {
 		filtered := []T{}
 
 		for i := 0; i < len(x.Value); i++ {
@@ -58,50 +58,50 @@ func FilterArray[T any](cb func(x T) bool) task.Operator[[]T, []T] {
 			}
 		}
 
-		m.ExecNext(task.ReplaceValue(x, filtered), next)
+		inner.ExecNext(task.ReplaceValue(x, filtered), next)
 	}
 }
 
-func FilterArrayRaw[T any](cb func(m *task.Inner, x *task.Message[T]) bool) task.Operator[[]T, []T] {
-	return func(m *task.Inner, x *task.Message[[]T], next *task.Step) {
+func FilterArrayRaw[T any](cb func(inner *task.Inner, x *task.Message[T]) bool) task.Operator[[]T, []T] {
+	return func(inner *task.Inner, x *task.Message[[]T], next *task.Step) {
 		filtered := []T{}
 
 		for i := 0; i < len(x.Value); i++ {
-			if cb(m, task.ReplaceValue(x, x.Value[i])) {
+			if cb(inner, task.ReplaceValue(x, x.Value[i])) {
 				filtered = append(filtered, x.Value[i])
 			}
 		}
 
-		m.ExecNext(task.ReplaceValue(x, filtered), next)
+		inner.ExecNext(task.ReplaceValue(x, filtered), next)
 	}
 }
 
 // JS-like array reducer
 func ReduceArray[T, R any](base R, reducer func(acc *R, x T) R) task.Operator[[]T, R] {
-	return func(m *task.Inner, x *task.Message[[]T], next *task.Step) {
+	return func(inner *task.Inner, x *task.Message[[]T], next *task.Step) {
 		for i := 0; i < len(x.Value); i++ {
 			base = reducer(&base, x.Value[i])
 		}
 
-		m.ExecNext(task.ReplaceValue(x, base), next)
+		inner.ExecNext(task.ReplaceValue(x, base), next)
 	}
 }
 
 // JS-like array reducer [raw version]
-func ReduceArrayRaw[T, R any](base R, reducer func(acc *R, m *task.Inner, x *task.Message[T]) R) task.Operator[[]T, R] {
-	return func(m *task.Inner, x *task.Message[[]T], next *task.Step) {
+func ReduceArrayRaw[T, R any](base R, reducer func(acc *R, inner *task.Inner, x *task.Message[T]) R) task.Operator[[]T, R] {
+	return func(inner *task.Inner, x *task.Message[[]T], next *task.Step) {
 		for i := 0; i < len(x.Value); i++ {
-			base = reducer(&base, m, task.ReplaceValue(x, x.Value[i]))
+			base = reducer(&base, inner, task.ReplaceValue(x, x.Value[i]))
 		}
 
-		m.ExecNext(task.ReplaceValue(x, base), next)
+		inner.ExecNext(task.ReplaceValue(x, base), next)
 	}
 }
 
 func FlatArray[T any]() task.Operator[[][]T, []T] {
-	return func(m *task.Inner, x *task.Message[[][]T], next *task.Step) {
+	return func(inner *task.Inner, x *task.Message[[][]T], next *task.Step) {
 		flatten := flatArray(&x.Value)
-		m.ExecNext(task.ReplaceValue(x, flatten), next)
+		inner.ExecNext(task.ReplaceValue(x, flatten), next)
 	}
 }
 
@@ -117,22 +117,22 @@ func flatArray[T any](arr *[][]T) []T {
 
 // Continue the task execution for each element of the array synchronously
 func IterateArray[T any]() task.Operator[[]T, T] {
-	return func(m *task.Inner, x *task.Message[[]T], next *task.Step) {
+	return func(inner *task.Inner, x *task.Message[[]T], next *task.Step) {
 		for i := 0; i < len(x.Value); i++ {
-			m.ExecNext(task.ReplaceValue(x, x.Value[i]), next)
+			inner.ExecNext(task.ReplaceValue(x, x.Value[i]), next)
 		}
 	}
 }
 
 // Continue the task exection for each element of the array asynchronously
 func ParallelizeArray[T any]() task.Operator[[]T, T] {
-	return func(m *task.Inner, x *task.Message[[]T], next *task.Step) {
+	return func(inner *task.Inner, x *task.Message[[]T], next *task.Step) {
 		ch := make(chan struct{}, len(x.Value))
 
 		for i := 0; i < len(x.Value); i++ {
 			c := *&i
 			go func() {
-				m.ExecNext(task.ReplaceValue(x, x.Value[c]), next)
+				inner.ExecNext(task.ReplaceValue(x, x.Value[c]), next)
 				ch <- struct{}{}
 			}()
 		}

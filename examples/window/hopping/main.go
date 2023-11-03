@@ -14,13 +14,13 @@ import (
 func main() {
 	T(T(T(
 		FromInterval("thw", 1000*time.Millisecond, 100, func(count int) int { return count }),
-		WithCustomKey(func(x int) string { return "default"})),
+		WithCustomKey(func(x int) string { return "default" })),
 		HoppingWindow(HWOptions[int]{
 			Size: 2100 * time.Millisecond,
 			Hop:  600 * time.Millisecond,
 		})),
 		Print[[]int](">"),
-	).Catch(func(m *Inner, e error) {
+	).Catch(func(i *Inner, e error) {
 		log.Fatal(e)
 	}).Run(context.Background())
 
@@ -45,5 +45,5 @@ func main() {
  *                                                                         ----------------------
  *                                                                               ----------------------
  *                                                                                     ----------------------
- * 									         
+ *
  *  */

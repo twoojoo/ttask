@@ -15,7 +15,7 @@ func main() {
 	T(
 		FromReadline("t1", "> type a phrase: "),
 		Print[string]("> you typed:"),
-	).Catch(func(m *Inner, e error) {
+	).Catch(func(i *Inner, e error) {
 		log.Fatal(e)
 	}).Run(ctx)
 
@@ -23,7 +23,7 @@ func main() {
 		FromReadChar("t2", "> now type a char: "),
 		Map(func(x rune) string { return string(x) })),
 		Print[string]("> you typed:"),
-	).Catch(func(m *Inner, e error) {
+	).Catch(func(i *Inner, e error) {
 		log.Fatal(e)
 	}).Run(ctx)
 

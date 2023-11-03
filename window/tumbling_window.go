@@ -19,7 +19,7 @@ func TumblingWindow[T any](options TWOptions[T]) task.Operator[T, []T] {
 
 	first := true
 
-	return func(m *task.Inner, x *task.Message[T], next *task.Step) {
+	return func(inner *task.Inner, x *task.Message[T], next *task.Step) {
 		if first {
 			go func() {
 				for range time.Tick(options.Size) {
@@ -33,7 +33,7 @@ func TumblingWindow[T any](options TWOptions[T]) task.Operator[T, []T] {
 						for i := range meta {
 							storage.CloseWindow(x.Key, meta[i].Id, options.Watermark, func(items []task.Message[T]) {
 								if len(items) > 0 {
-									m.ExecNext(task.ToArray(x, items), next)
+									inner.ExecNext(task.ToArray(x, items), next)
 								}
 							})
 						}

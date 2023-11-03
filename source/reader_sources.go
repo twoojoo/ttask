@@ -7,7 +7,7 @@ import (
 )
 
 func fromReader(r io.Reader, bufSize int) task.Operator[any, []byte] {
-	return func(m *task.Inner, x *task.Message[any], next *task.Step) {
+	return func(inner *task.Inner, x *task.Message[any], next *task.Step) {
 		buf := make([]byte, bufSize)
 
 		for {
@@ -15,11 +15,11 @@ func fromReader(r io.Reader, bufSize int) task.Operator[any, []byte] {
 
 			if err != io.EOF {
 				if err != nil {
-					m.Error(err)
+					inner.Error(err)
 					return
 				}
 
-				m.ExecNext(task.NewMessage(buf[:n]), next)
+				inner.ExecNext(task.NewMessage(buf[:n]), next)
 			}
 		}
 	}

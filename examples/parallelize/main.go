@@ -14,7 +14,7 @@ func main() {
 		Print[string]("> 1:")),
 		Parallelize[string](5)),
 		Print[string]("> 2:"),
-	).Catch(func(m *Inner, e error) {
+	).Catch(func(i *Inner, e error) {
 		log.Fatal(e)
 	}).Lock()
 

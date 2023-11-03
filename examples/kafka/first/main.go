@@ -57,7 +57,7 @@ func main() {
 			},
 			KafkaSinkOpts{Logger: logs},
 		),
-	).Catch(func(m *Inner, e error) {
+	).Catch(func(i *Inner, e error) {
 		log.Fatal(e)
 	}).Run(context.Background())
 }

@@ -32,7 +32,7 @@ func main() {
 			return *acc + x
 		})),
 		Print[string](">"),
-	).Catch(func(m *Inner, e error) {
+	).Catch(func(i *Inner, e error) {
 		log.Fatal(e)
 	}).Run(ctx)
 

@@ -14,7 +14,7 @@ func SessionWindow[T any](options SWOptions[T]) task.Operator[T, []T] {
 	//store inactivity check goroutines
 	stopIncactivityCheckCh := map[string]chan int{}
 
-	return func(m *task.Inner, x *task.Message[T], next *task.Step) {
+	return func(inner *task.Inner, x *task.Message[T], next *task.Step) {
 		meta := storage.GetWindowsMetadata(x.Key)
 		mt := getMessageTime(options.WindowingTime, x)
 		meta = assignMessageToWindows(meta, x, mt)
@@ -35,7 +35,7 @@ func SessionWindow[T any](options SWOptions[T]) task.Operator[T, []T] {
 				if meta.End == 0 && meta.Last <= time.Now().UnixMilli()-options.MaxInactivity.Milliseconds() {
 					storage.CloseWindow(x.Key, meta.Id, options.Watermark, func(items []task.Message[T]) {
 						if len(items) > 0 {
-							m.ExecNext(task.ToArray(x, items), next)
+							inner.ExecNext(task.ToArray(x, items), next)
 						}
 					})
 				}
@@ -51,7 +51,7 @@ func SessionWindow[T any](options SWOptions[T]) task.Operator[T, []T] {
 				if meta.End == 0 && meta.Last <= time.Now().UnixMilli()-options.MaxInactivity.Milliseconds() {
 					storage.CloseWindow(x.Key, meta.Id, options.Watermark, func(items []task.Message[T]) {
 						if len(items) > 0 {
-							m.ExecNext(task.ToArray(x, items), next)
+							inner.ExecNext(task.ToArray(x, items), next)
 						}
 					})
 				}
@@ -63,11 +63,11 @@ func SessionWindow[T any](options SWOptions[T]) task.Operator[T, []T] {
 
 				meta := storage.GetWindowMetadata(x.Key, meta.Id)
 
-				//on max size: close 
+				//on max size: close
 				if meta.End == 0 {
 					storage.CloseWindow(x.Key, meta.Id, options.Watermark, func(items []task.Message[T]) {
 						if len(items) > 0 {
-							m.ExecNext(task.ToArray(x, items), next)
+							inner.ExecNext(task.ToArray(x, items), next)
 						}
 					})
 				}

@@ -26,7 +26,7 @@ func main() {
 		Print[string]("#2 - transformed:\t")),
 		ToFile(out, "|")),
 		Print[string]("#3 - written:\t\t"),
-	).Catch(func(m *Inner, e error) {
+	).Catch(func(i *Inner, e error) {
 		log.Fatal(e)
 	}).Run(ctx)
 }

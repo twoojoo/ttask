@@ -5,8 +5,6 @@ import (
 	"github.com/twoojoo/ttask/task"
 )
 
-
-
 // Counting Window:
 //
 // ...1....2.........3...........4...5......6........7....8....
@@ -18,7 +16,7 @@ func CountingWindow[T any](options CWOptions[T]) task.Operator[T, []T] {
 
 	stopIncactivityCheckCh := map[string]chan int{}
 
-	return func(m *task.Inner, x *task.Message[T], next *task.Step) {
+	return func(inner *task.Inner, x *task.Message[T], next *task.Step) {
 		//cancel last inactivity check
 		if stopIncactivityCheckCh[x.Key] != nil {
 			stopIncactivityCheckCh[x.Key] <- 1
@@ -42,7 +40,7 @@ func CountingWindow[T any](options CWOptions[T]) task.Operator[T, []T] {
 				// storage.CloseWindow(x.Key, meta[0].Id)
 				items := storage.FlushWindow(x.Key, meta[0].Id)
 				if len(items) > 0 {
-					m.ExecNext(task.ToArray(x, items), next)
+					inner.ExecNext(task.ToArray(x, items), next)
 				}
 			})
 		}
@@ -60,7 +58,7 @@ func CountingWindow[T any](options CWOptions[T]) task.Operator[T, []T] {
 			// storage.CloseWindow(x.Key, meta[0].Id)
 			items := storage.FlushWindow(x.Key, meta[0].Id)
 			if len(items) > 0 {
-				m.ExecNext(task.ToArray(x, items), next)
+				inner.ExecNext(task.ToArray(x, items), next)
 			}
 		}
 	}

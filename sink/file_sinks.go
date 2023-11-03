@@ -7,14 +7,14 @@ import (
 	"github.com/twoojoo/ttask/utils"
 )
 
-//Sink: write each Task result to a file unsing a separator (default: \n)
+// Sink: write each Task result to a file unsing a separator (default: \n)
 func ToFile(path string, separator ...string) task.Operator[string, string] {
-	return func(m *task.Inner, x *task.Message[string], next *task.Step) {
+	return func(inner *task.Inner, x *task.Message[string], next *task.Step) {
 		file, err := utils.OpenOrCreateFile(path)
 		defer file.Close()
 
 		if err != nil {
-			m.Error(err)
+			inner.Error(err)
 			return
 		}
 
@@ -27,11 +27,10 @@ func ToFile(path string, separator ...string) task.Operator[string, string] {
 
 		_, err = writer.WriteString(x.Value + s)
 		if err != nil {
-			m.Error(err)
+			inner.Error(err)
 			return
 		}
 
-
-		m.ExecNext(x, next)
+		inner.ExecNext(x, next)
 	}
 }

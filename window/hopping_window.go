@@ -14,7 +14,7 @@ func HoppingWindow[T any](options HWOptions[T]) task.Operator[T, []T] {
 	first := true
 	nextStart := int64(0)
 
-	return func(m *task.Inner, x *task.Message[T], next *task.Step) {
+	return func(inner *task.Inner, x *task.Message[T], next *task.Step) {
 		if first {
 			first = false
 			go startWinLoop[T](options, func(start int64) {
@@ -34,7 +34,7 @@ func HoppingWindow[T any](options HWOptions[T]) task.Operator[T, []T] {
 						if meta[i].End == 0 && meta[i].Start <= (end-options.Size.Milliseconds()) {
 							storage.CloseWindow(x.Key, meta[i].Id, options.Watermark, func(items []task.Message[T]) {
 								if len(items) > 0 {
-									m.ExecNext(task.ToArray(x, items), next)
+									inner.ExecNext(task.ToArray(x, items), next)
 								}
 							})
 						}

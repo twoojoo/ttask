@@ -21,7 +21,7 @@ type Inner struct {
 // Returining immediatelly after calling this funciton is highly suggested in order to avoid
 // unwanted code executions (returned value doesn't matter).
 // If the Catch method of the Task isn't used, the error will be lost.
-func (m *Inner) Error(e error, decorators ...any) {
+func (inner *Inner) Error(e error, decorators ...any) {
 	if len(decorators) > 0 {
 		dec := ""
 		for i, d := range decorators {
@@ -32,21 +32,21 @@ func (m *Inner) Error(e error, decorators ...any) {
 			dec += fmt.Sprint(d)
 		}
 
-		m.error = fmt.Errorf("%s %w", dec, e)
+		inner.error = fmt.Errorf("%s %w", dec, e)
 	} else {
-		m.error = e
+		inner.error = e
 	}
 }
 
 // Trigger the next Task step.
 // Use this in a raw Operator to handle the Task flow in a custom way
 // (NOT TYPE SAFE)
-func (m *Inner) ExecNext(x any, next *Step) {
-	m.lastResult = x
+func (inner *Inner) ExecNext(x any, next *Step) {
+	inner.lastResult = x
 
-	if m.error != nil {
-		if m.catcher != nil {
-			m.catcher(m, m.error)
+	if inner.error != nil {
+		if inner.catcher != nil {
+			inner.catcher(inner, inner.error)
 		}
 
 		return
@@ -63,7 +63,7 @@ func (m *Inner) ExecNext(x any, next *Step) {
 	}
 
 	argsValue := []reflect.Value{
-		reflect.ValueOf(m),
+		reflect.ValueOf(inner),
 		reflect.ValueOf(x),
 		reflect.ValueOf(next.next),
 	}

@@ -12,7 +12,7 @@ import (
 )
 
 func fromKafka(consumer *kafka.Consumer, logger bool, timeout ...time.Duration) task.Operator[any, types.KafkaMessage[[]byte]] {
-	return func(m *task.Inner, x *task.Message[any], next *task.Step) {
+	return func(inner *task.Inner, x *task.Message[any], next *task.Step) {
 		to := time.Second
 
 		if len(timeout) > 0 {
@@ -32,9 +32,9 @@ func fromKafka(consumer *kafka.Consumer, logger bool, timeout ...time.Duration) 
 					logKafkaMessage(msg)
 				}
 
-				m.ExecNext(tMsg, next)
+				inner.ExecNext(tMsg, next)
 			} else {
-				m.Error(errors.New("TTask [FromKafka] error: " + err.Error()))
+				inner.Error(errors.New("TTask [FromKafka] error: " + err.Error()))
 			}
 		}
 	}

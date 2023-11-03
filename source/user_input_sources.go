@@ -10,20 +10,20 @@ import (
 )
 
 func fromReadLine(prompt string) task.Operator[any, string] {
-	return func(m *task.Inner, x *task.Message[any], next *task.Step) {
+	return func(inner *task.Inner, x *task.Message[any], next *task.Step) {
 		reader := bufio.NewReader(os.Stdin)
 
 		fmt.Print(prompt)
 		line, err := reader.ReadString('\n')
 
 		if err != nil {
-			m.Error(err)
+			inner.Error(err)
 			return
 		}
 
 		line = strings.Split(line, "\n")[0]
 
-		m.ExecNext(task.NewMessage(line), next)
+		inner.ExecNext(task.NewMessage(line), next)
 	}
 }
 
@@ -32,17 +32,17 @@ func FromReadline(taskId string, prompt string) *task.TTask[any, string] {
 }
 
 func fromReadChar(prompt string) task.Operator[any, rune] {
-	return func(m *task.Inner, x *task.Message[any], next *task.Step) {
+	return func(inner *task.Inner, x *task.Message[any], next *task.Step) {
 		reader := bufio.NewReader(os.Stdin)
 
 		fmt.Print(prompt)
 		rune, _, err := reader.ReadRune()
 		if err != nil {
-			m.Error(err)
+			inner.Error(err)
 			return
 		}
 
-		m.ExecNext(task.NewMessage(rune), next)
+		inner.ExecNext(task.NewMessage(rune), next)
 	}
 }
 

@@ -17,7 +17,7 @@ type KafkaSinkOpts struct {
 
 // Sink: send the message to a kafka topic
 func ToKafka[T any](producer *kafka.Producer, topic string, toBytes func(x T) []byte, options KafkaSinkOpts) task.Operator[T, T] {
-	return func(m *task.Inner, x *task.Message[T], next *task.Step) {
+	return func(inner *task.Inner, x *task.Message[T], next *task.Step) {
 		ch := make(chan kafka.Event)
 
 		err := producer.Produce(&kafka.Message{
@@ -30,7 +30,7 @@ func ToKafka[T any](producer *kafka.Producer, topic string, toBytes func(x T) []
 		}, ch)
 
 		if err != nil {
-			m.Error(errors.New("TTask [ToKafka] error: " + err.Error()))
+			inner.Error(errors.New("TTask [ToKafka] error: " + err.Error()))
 			return
 		}
 
@@ -38,18 +38,18 @@ func ToKafka[T any](producer *kafka.Producer, topic string, toBytes func(x T) []
 
 		switch ev := event.(type) {
 		case *kafka.Message:
-			m.ExecNext(x, next)
+			inner.ExecNext(x, next)
 
 			if options.Logger {
 				logKafkaSend(x.Key, ev.TopicPartition)
 			}
 		default:
 			if options.ContinueOnError {
-				m.ExecNext(x, next)
+				inner.ExecNext(x, next)
 			}
 
 			if !options.SkipErrorReporting {
-				m.Error(errors.New("TTask [ToKafka] error: " + ev.String()))
+				inner.Error(errors.New("TTask [ToKafka] error: " + ev.String()))
 				return
 			}
 		}

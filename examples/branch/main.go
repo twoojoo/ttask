@@ -14,7 +14,7 @@ func main() {
 		Injectable[string]("t2"),
 		Delay[string](time.Second)),
 		Print[string]("> third:"),
-	).Catch(func(m *Inner, e error) {
+	).Catch(func(i *Inner, e error) {
 		log.Fatal(e)
 	}).Lock()
 
@@ -34,7 +34,7 @@ func main() {
 
 	task := T(step2, Print[string]("> second:"))
 
-	task.Lock().Catch(func(m *Inner, e error) {
+	task.Lock().Catch(func(i *Inner, e error) {
 		log.Fatal(e)
 	})
 

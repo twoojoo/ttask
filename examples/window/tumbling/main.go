@@ -19,7 +19,7 @@ func main() {
 			WindowingTime: EventTime,
 		})),
 		Print[[]int](">"),
-	).Catch(func(m *Inner, e error) {
+	).Catch(func(i *Inner, e error) {
 		log.Fatal(e)
 	}).Run(context.Background())
 

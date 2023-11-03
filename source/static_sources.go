@@ -8,8 +8,8 @@ import (
 )
 
 func fromItem[T any](item T) task.Operator[any, T] {
-	return func(m *task.Inner, x *task.Message[any], next *task.Step) {
-		m.ExecNext(task.NewMessage(item), next)
+	return func(inner *task.Inner, x *task.Message[any], next *task.Step) {
+		inner.ExecNext(task.NewMessage(item), next)
 	}
 }
 
@@ -19,9 +19,9 @@ func FromItem[T any](taskId string, item T) *task.TTask[any, T] {
 }
 
 func fromArray[T any](array []T) task.Operator[any, T] {
-	return func(m *task.Inner, x *task.Message[any], next *task.Step) {
+	return func(inner *task.Inner, x *task.Message[any], next *task.Step) {
 		for _, el := range array {
-			m.ExecNext(task.NewMessage(el), next)
+			inner.ExecNext(task.NewMessage(el), next)
 		}
 	}
 }
@@ -32,14 +32,14 @@ func FromArray[T any](taskId string, array []T) *task.TTask[any, T] {
 }
 
 func fromString(string string, step ...int) task.Operator[any, string] {
-	return func(m *task.Inner, x *task.Message[any], next *task.Step) {
+	return func(inner *task.Inner, x *task.Message[any], next *task.Step) {
 		subStr := ""
 
 		for _, char := range strings.Split(string, "") {
 			subStr += char
 
 			if len(subStr) >= step[0] {
-				m.ExecNext(task.NewMessage(subStr), next)
+				inner.ExecNext(task.NewMessage(subStr), next)
 				subStr = ""
 			}
 		}
@@ -52,9 +52,9 @@ func FromString(taskId string, string string, step ...int) *task.TTask[any, stri
 }
 
 func fromStringSplit(string string, delimiter string) task.Operator[any, string] {
-	return func(m *task.Inner, x *task.Message[any], next *task.Step) {
+	return func(inner *task.Inner, x *task.Message[any], next *task.Step) {
 		for _, subStr := range strings.Split(string, delimiter) {
-			m.ExecNext(task.NewMessage(subStr), next)
+			inner.ExecNext(task.NewMessage(subStr), next)
 		}
 	}
 }
@@ -64,14 +64,14 @@ func FromStringSplit(taskId string, string string, delimiter string) *task.TTask
 	return task.T(task.Task[any](taskId), fromStringSplit(string, delimiter))
 }
 
-func fromInterval[T any](size time.Duration, max int, generator func(count int) T)  task.Operator[any, T] {
-	return func(m *task.Inner, x *task.Message[any], next *task.Step) {
+func fromInterval[T any](size time.Duration, max int, generator func(count int) T) task.Operator[any, T] {
+	return func(inner *task.Inner, x *task.Message[any], next *task.Step) {
 		counter := 0
 
 		for range time.Tick(size) {
-			value  := generator(counter)
+			value := generator(counter)
 
-			m.ExecNext(task.NewMessage(value), next)
+			inner.ExecNext(task.NewMessage(value), next)
 
 			if max != 0 && counter == max-1 {
 				break
@@ -82,7 +82,7 @@ func fromInterval[T any](size time.Duration, max int, generator func(count int) 
 	}
 }
 
-// Source: trigger a task execution at a given interval. 
+// Source: trigger a task execution at a given interval.
 // Generator function will produce the message, optionally using the interval counter.
 // A max of 0 will generate and endless interval.
 func FromInterval[T any](taskId string, size time.Duration, max int, generator func(count int) T) *task.TTask[any, T] {

@@ -8,7 +8,7 @@ import (
 
 // Delay the next task step.
 func Delay[T any](d time.Duration) task.Operator[T, T] {
-	return func(m *task.Inner, x *task.Message[T], next *task.Step) {
+	return func(inner *task.Inner, x *task.Message[T], next *task.Step) {
 		time.Sleep(d)
 		m.ExecNext(x, next)
 	}
@@ -22,7 +22,7 @@ func Chain[O, T any](t *task.TTask[O, T]) task.Operator[O, T] {
 	task.T(t, chain[T](chainCh))
 	t.Lock()
 
-	return func(m *task.Inner, x *task.Message[O], next *task.Step) {
+	return func(inner *task.Inner, x *task.Message[O], next *task.Step) {
 		go func() {
 			chainCh <- chainInfo{
 				metaPtr: m,
@@ -40,7 +40,7 @@ type chainInfo struct {
 }
 
 func chain[T any](ch chan chainInfo) task.Operator[T, T] {
-	return TapRaw(func(m *task.Inner, x *task.Message[T]) {
+	return TapRaw(func(inner *task.Inner, x *task.Message[T]) {
 		chainInfo := <-ch
 		chainInfo.metaPtr.ExecNext(x, chainInfo.nextPtr)
 	})
@@ -53,7 +53,7 @@ func chain[T any](ch chan chainInfo) task.Operator[T, T] {
 func Branch[T any](t *task.TTask[T, T]) task.Operator[T, T] {
 	t.Lock()
 
-	return func(m *task.Inner, x *task.Message[T], next *task.Step) {
+	return func(inner *task.Inner, x *task.Message[T], next *task.Step) {
 		msgCopy := *x
 
 		go func() {
@@ -68,7 +68,7 @@ func Branch[T any](t *task.TTask[T, T]) task.Operator[T, T] {
 func BranchWhere[T any](t *task.TTask[T, T], filter func(x T) bool) task.Operator[T, T] {
 	t.Lock()
 
-	return func(m *task.Inner, x *task.Message[T], next *task.Step) {
+	return func(inner *task.Inner, x *task.Message[T], next *task.Step) {
 		msgCopy := *x
 
 		if filter(x.Value) {
@@ -85,16 +85,16 @@ func BranchWhere[T any](t *task.TTask[T, T], filter func(x T) bool) task.Operato
 func BranchSwitch[T any](t *task.TTask[T, T], filter func(x T) bool) task.Operator[T, T] {
 	t.Lock()
 
-	return func(m *task.Inner, x *task.Message[T], next *task.Step) {
+	return func(inner *task.Inner, x *task.Message[T], next *task.Step) {
 		msgCopy := *x
 
 		if filter(x.Value) {
 			go func() {
-				t.InjectRaw(m.Context, &msgCopy)
+				t.InjectRaw(inner.Context, &msgCopy)
 			}()
 		} else {
 
-			m.ExecNext(x, next)
+			inner.ExecNext(x, next)
 		}
 	}
 }
@@ -104,7 +104,7 @@ func Parallelize[T any](n int) task.Operator[T, T] {
 	cache := []*task.Message[T]{}
 	ch := make(chan struct{}, n)
 
-	return func(m *task.Inner, x *task.Message[T], next *task.Step) {
+	return func(inner *task.Inner, x *task.Message[T], next *task.Step) {
 		cache = append(cache, x)
 
 		if len(cache) == n {
@@ -112,7 +112,7 @@ func Parallelize[T any](n int) task.Operator[T, T] {
 				msgCp := &*msg
 
 				go func() {
-					m.ExecNext(msgCp, next)
+					inner.ExecNext(msgCp, next)
 					ch <- struct{}{}
 				}()
 			}
