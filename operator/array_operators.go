@@ -28,7 +28,7 @@ func MapArrayRaw[T, R any](cb func(m *task.Inner, x *task.Message[T]) R) task.Op
 	}
 }
 
-func Each[T any](cb func(x T)) task.Operator[[]T, []T] {
+func ForEach[T any](cb func(x T)) task.Operator[[]T, []T] {
 	return func(m *task.Inner, x *task.Message[[]T], next *task.Step) {
 		for i := 0; i < len(x.Value); i++ {
 			cb(x.Value[i])

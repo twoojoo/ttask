@@ -113,7 +113,8 @@ func Delay[T any](d time.Duration)
 ```go
 func MapArray[T, R any](cb func(x T) R) 
 
-func Each[T any](cb func(x T)) 
+// Execute an action for each element of the array
+func ForEach[T any](cb func(x T)) 
 
 func FilterArray[T any](cb func(x T) bool)
 
