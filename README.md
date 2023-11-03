@@ -15,7 +15,7 @@ Working examples in the [examples](./examples) folder.
 - [Sources](#sources)
 - [Sinks](#sinks)
 - [Operators](#operators)
-- [Tasl flow](#task-flow)
+- [Task flow](#task-flow)
 - [Windowing](#windowing)
 	- [Tumbling window](#tumbling-window)
 	- [Hopping window](#hopping-window)
