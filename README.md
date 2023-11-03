@@ -2,9 +2,9 @@
 
 A stream processing library for Go, heavily inspired by [alyxstream](https://github.com/smartpricing/alyxstream).
 
-**⚠** I'm writing this module for learning purposes
+**⚠**  I'm writing this module for learning purposes
 
-**⚠** This module is **not idiomatic Go**. Due to the lack of generics on struct methods (*go 1.21.3* - see [this issue](https://github.com/golang/go/issues/49085)), I was forced to use a weird pattern to replicate a sort of fluent syntax while mantaining full type safety, hence the name of the module. If a future version of go support this feature, a new version of this module may be written.
+**⚠**  This module is **not idiomatic Go**. Due to the lack of generics on struct methods (*go 1.21.3* - see [this issue](https://github.com/golang/go/issues/49085)), I was forced to use a weird pattern to replicate a sort of fluent syntax while mantaining full type safety, hence the name of the module. If a future version of go support this feature, a new version of this module may be written.
 
 Working examples in the [examples](./examples) folder.
 
@@ -232,7 +232,7 @@ Here's what's happpening:
 - the error will be catched by the catcher callback passed to the Catch method of the task
 - **the task won't continue** to the following operators
 
-**⚠** if the catcher callback is not set, the error will be raised, but it will be ignored
+**⚠**  if the catcher callback is not set, the error will be raised, but it will be ignored
 
 #### Custom operators
 
