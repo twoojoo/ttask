@@ -98,30 +98,19 @@ func ReduceArrayRaw[T, R any](base R, reducer func(acc *R, m *task.Inner, x *tas
 	}
 }
 
-// func FlatArray[T any](cb func(x T) bool) task.Operator[[]T, []T] {
-// 	return func(m *task.Inner, x *task.Message[[]T], next *task.Step) {
-// 		filtered := []T{}
+func FlatArray[T any]() task.Operator[[][]T, []T] {
+	return func(m *task.Inner, x *task.Message[[][]T], next *task.Step) {
+		flatten := flatArray(&x.Value)
+		m.ExecNext(task.ReplaceValue(x, flatten), next)
+	}
+}
 
-// 		for i := 0; i < len(x.Value); i++ {
-// 			if cb(x.Value[i]) {
-// 				filtered = append(filtered, x.Value[i])
-// 			}
-// 		}
+func flatArray[T any](arr *[][]T) []T {
+	flatten := []T{}
 
-// 		m.ExecNext(task.ReplaceValue(x, filtered), next)
-// 	}
-// }
+	for i := range *arr {
+		flatten = append(flatten, (*arr)[i]...)
+	}
 
-// func FlatArrayRaw[T any](cb func(m *task.Inner, x T) bool) task.Operator[[][]T, []T] {
-// 	return func(m *task.Inner, x *task.Message[[][]T], next *task.Step) {
-// 		filtered := []T{}
-
-// 		for i := 0; i < len(x.Value); i++ {
-// 			if cb(m, x.Value[i]) {
-// 				filtered = append(filtered, x.Value[i])
-// 			}
-// 		}
-
-// 		m.ExecNext(task.ReplaceValue(x, filtered), next)
-// 	}
-// }
+	return flatten
+}
