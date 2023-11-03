@@ -164,7 +164,7 @@ func BranchWhere[T any](t *TTask[T, T], filter func(x T) bool)
 func BranchSwitch[T any](t *TTask[T, T], filter func(x T) bool) 
 ```
 
-### Raw Operators
+### Raw operators
 
 Most operators have a so called **raw** version, meaning that it give access to lower level task resources, namely *task inner methods and properties* and *message metadata*. For example the Tap operator has its own raw version:
 
