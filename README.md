@@ -55,7 +55,7 @@ t := T(T(T(
 			return strconv.Itoa(x)
 		})),
 		Print[string](">"),
-	).Catch(func(m *Meta, e error) {
+	).Catch(func(m *Inner, e error) {
 		log.Fatal(e)
 	}).Lock()
 
@@ -169,7 +169,7 @@ func BranchSwitch[T any](t *TTask[T, T], filter func(x T) bool)
 Most operators have a so called **raw** version, meaning that it give access to lower level task resources, namely *task inner methods and properties* and *message metadata*. For example the Tap operator has its own raw version:
 
 ```go
-func TapRaw[T any](cb func(m *Meta, x *Message[T])) 
+func TapRaw[T any](cb func(m *Inner, x *Message[T])) 
 ```
 
 #### Task meta
@@ -184,7 +184,7 @@ When the logic of your operator's callback is error prone, it's highly suggested
 t := T(T(T(
 	Injectable[string]("t1"),
 	Delay[string](time.Second)),
-	TapRaw(func (m *Meta, x Message[string]) int {
+	TapRaw(func (m *Inner, x Message[string]) int {
 		num, err := strconv.Atoi(x)
 		if err != nil {
 			m.Error(err)
@@ -194,7 +194,7 @@ t := T(T(T(
 		return num
 	})),
 	Print[int](">"),
-).Catch(func(m *Meta, e error) {
+).Catch(func(m *Inner, e error) {
 	log.Fatal(e)
 }).Lock()
 
