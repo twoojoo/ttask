@@ -5,7 +5,7 @@ import (
 )
 
 func MapArray[T, R any](cb func(x T) R) task.Operator[[]T, []R] {
-	return func(m *task.Meta, x *task.Message[[]T], next *task.Step) {
+	return func(m *task.Inner, x *task.Message[[]T], next *task.Step) {
 		mapped := make([]R, len(x.Value))
 
 		for i := 0; i < len(x.Value); i++ {
@@ -16,8 +16,8 @@ func MapArray[T, R any](cb func(x T) R) task.Operator[[]T, []R] {
 	}
 }
 
-func MapArrayRaw[T, R any](cb func(m *task.Meta, x T) R) task.Operator[[]T, []R] {
-	return func(m *task.Meta, x *task.Message[[]T], next *task.Step) {
+func MapArrayRaw[T, R any](cb func(m *task.Inner, x T) R) task.Operator[[]T, []R] {
+	return func(m *task.Inner, x *task.Message[[]T], next *task.Step) {
 		mapped := make([]R, len(x.Value))
 
 		for i := 0; i < len(x.Value); i++ {
@@ -29,7 +29,7 @@ func MapArrayRaw[T, R any](cb func(m *task.Meta, x T) R) task.Operator[[]T, []R]
 }
 
 func Each[T any](cb func(x T)) task.Operator[[]T, []T] {
-	return func(m *task.Meta, x *task.Message[[]T], next *task.Step) {
+	return func(m *task.Inner, x *task.Message[[]T], next *task.Step) {
 		for i := 0; i < len(x.Value); i++ {
 			cb(x.Value[i])
 		}
@@ -38,8 +38,8 @@ func Each[T any](cb func(x T)) task.Operator[[]T, []T] {
 	}
 }
 
-func EachRaw[T, R any](cb func(m *task.Meta, x T) R) task.Operator[[]T, []R] {
-	return func(m *task.Meta, x *task.Message[[]T], next *task.Step) {
+func EachRaw[T, R any](cb func(m *task.Inner, x T) R) task.Operator[[]T, []R] {
+	return func(m *task.Inner, x *task.Message[[]T], next *task.Step) {
 		for i := 0; i < len(x.Value); i++ {
 			cb(m, x.Value[i])
 		}
@@ -49,7 +49,7 @@ func EachRaw[T, R any](cb func(m *task.Meta, x T) R) task.Operator[[]T, []R] {
 }
 
 func FilterArray[T any](cb func(x T) bool) task.Operator[[]T, []T] {
-	return func(m *task.Meta, x *task.Message[[]T], next *task.Step) {
+	return func(m *task.Inner, x *task.Message[[]T], next *task.Step) {
 		filtered := []T{}
 
 		for i := 0; i < len(x.Value); i++ {
@@ -62,8 +62,8 @@ func FilterArray[T any](cb func(x T) bool) task.Operator[[]T, []T] {
 	}
 }
 
-func FilterArrayRaw[T any](cb func(m *task.Meta, x T) bool) task.Operator[[]T, []T] {
-	return func(m *task.Meta, x *task.Message[[]T], next *task.Step) {
+func FilterArrayRaw[T any](cb func(m *task.Inner, x T) bool) task.Operator[[]T, []T] {
+	return func(m *task.Inner, x *task.Message[[]T], next *task.Step) {
 		filtered := []T{}
 
 		for i := 0; i < len(x.Value); i++ {
@@ -77,7 +77,7 @@ func FilterArrayRaw[T any](cb func(m *task.Meta, x T) bool) task.Operator[[]T, [
 }
 
 // func FlatArray[T any](cb func(x T) bool) task.Operator[[]T, []T] {
-// 	return func(m *task.Meta, x *task.Message[[]T], next *task.Step) {
+// 	return func(m *task.Inner, x *task.Message[[]T], next *task.Step) {
 // 		filtered := []T{}
 
 // 		for i := 0; i < len(x.Value); i++ {
@@ -90,8 +90,8 @@ func FilterArrayRaw[T any](cb func(m *task.Meta, x T) bool) task.Operator[[]T, [
 // 	}
 // }
 
-// func FlatArrayRaw[T any](cb func(m *task.Meta, x T) bool) task.Operator[[][]T, []T] {
-// 	return func(m *task.Meta, x *task.Message[[][]T], next *task.Step) {
+// func FlatArrayRaw[T any](cb func(m *task.Inner, x T) bool) task.Operator[[][]T, []T] {
+// 	return func(m *task.Inner, x *task.Message[[][]T], next *task.Step) {
 // 		filtered := []T{}
 
 // 		for i := 0; i < len(x.Value); i++ {

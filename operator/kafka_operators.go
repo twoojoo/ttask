@@ -11,7 +11,7 @@ import (
 
 //Perform a commit on the current kafka message.
 func KafkaCommit[T any](consumer *kafka.Consumer, logger bool) task.Operator[types.KafkaMessage[T], types.KafkaMessage[T]] {
-	return func(m *task.Meta, x *task.Message[types.KafkaMessage[T]], next *task.Step) {
+	return func(m *task.Inner, x *task.Message[types.KafkaMessage[T]], next *task.Step) {
 		tp := x.Value.TopicPartition
 
 		_, err := consumer.CommitOffsets([]kafka.TopicPartition{tp})
@@ -29,7 +29,7 @@ func KafkaCommit[T any](consumer *kafka.Consumer, logger bool) task.Operator[typ
 }
 
 // func KafkaCommitMany[T any](consumer *kafka.Consumer, logger bool) task.Operator[[]types.KafkaMessage[T], []types.KafkaMessage[T]] {
-// 	return func(m *task.Meta, x *task.Message[[]types.KafkaMessage[T]], next *task.Step) {
+// 	return func(m *task.Inner, x *task.Message[[]types.KafkaMessage[T]], next *task.Step) {
 // 		tp := []kafka.TopicPartition{}
 
 // 		for _, v := range x.Value {

@@ -14,7 +14,7 @@ func HoppingWindow[T any](options HWOptions[T]) task.Operator[T, []T] {
 	first := true
 	nextStart := int64(0)
 
-	return func(m *task.Meta, x *task.Message[T], next *task.Step) {
+	return func(m *task.Inner, x *task.Message[T], next *task.Step) {
 		if first {
 			first = false
 			go startWinLoop[T](options, func(start int64) {

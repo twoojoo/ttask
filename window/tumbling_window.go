@@ -19,7 +19,7 @@ func TumblingWindow[T any](options TWOptions[T]) task.Operator[T, []T] {
 
 	first := true
 
-	return func(m *task.Meta, x *task.Message[T], next *task.Step) {
+	return func(m *task.Inner, x *task.Message[T], next *task.Step) {
 		if first {
 			go func() {
 				for range time.Tick(options.Size) {

@@ -9,7 +9,7 @@ import (
 
 // Sink: write message to a writer
 func ToWriter[T any](w io.Writer, toBytes func(x T) []byte) task.Operator[T, T] {
-	return operator.MapRaw(func(m *task.Meta, x *task.Message[T]) T {
+	return operator.MapRaw(func(m *task.Inner, x *task.Message[T]) T {
 		_, err := w.Write(toBytes(x.Value))
 
 		if err != nil {
@@ -24,7 +24,7 @@ func ToWriter[T any](w io.Writer, toBytes func(x T) []byte) task.Operator[T, T] 
 
 // Sink: write message to a writer. Next message value will be the number of written bytes.
 func ToWriterCount[T any](w io.Writer, toBytes func(x T) []byte) task.Operator[T, int] {
-	return operator.MapRaw(func(m *task.Meta, x *task.Message[T]) int {
+	return operator.MapRaw(func(m *task.Inner, x *task.Message[T]) int {
 		w, err := w.Write(toBytes(x.Value))
 
 		if err != nil {

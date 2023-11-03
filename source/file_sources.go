@@ -8,7 +8,7 @@ import (
 )
 
 func fromFile(path string) task.Operator[any, string] {
-	return func(m *task.Meta, _ *task.Message[any], next *task.Step) {
+	return func(m *task.Inner, _ *task.Message[any], next *task.Step) {
 		file, err := os.Open(path)
 
 		if err != nil {

@@ -57,9 +57,8 @@ func (t *TTask[O, T]) InjectRaw(c context.Context, m *Message[O]) error {
 	return nil
 }
 
-
 // Catch any error that was raised in the Task with the m.Error function.
-func (t *TTask[O, T]) Catch(catcher func(m *Meta, e error)) *TTask[O, T] {
+func (t *TTask[O, T]) Catch(catcher func(m *Inner, e error)) *TTask[O, T] {
 	t.meta.catcher = catcher
 	return t
 }

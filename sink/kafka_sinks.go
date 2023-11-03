@@ -17,7 +17,7 @@ type KafkaSinkOpts struct {
 
 // Sink: send the message to a kafka topic
 func ToKafka[T any](producer *kafka.Producer, topic string, toBytes func(x T) []byte, options KafkaSinkOpts) task.Operator[T, T] {
-	return func(m *task.Meta, x *task.Message[T], next *task.Step) {
+	return func(m *task.Inner, x *task.Message[T], next *task.Step) {
 		ch := make(chan kafka.Event)
 
 		err := producer.Produce(&kafka.Message{

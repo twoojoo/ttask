@@ -7,7 +7,7 @@ type TTask[O, T any] struct {
 	first      *Step
 	last       int
 	path       map[int]any
-	meta       *Meta
+	meta       *Inner
 }
 
 // Use this to build custom sources only. Not an injectable task.
@@ -22,7 +22,7 @@ func Task[T any](id string) *TTask[T, T] {
 			action: nil,
 			next:   nil,
 		},
-		meta: &Meta{
+		meta: &Inner{
 			taskId:  id,
 			Context: nil,
 			error:   nil,
@@ -45,7 +45,7 @@ func Injectable[T any](id string) *TTask[T, T] {
 			action: nil,
 			next:   nil,
 		},
-		meta: &Meta{
+		meta: &Inner{
 			taskId:  id,
 			Context: nil,
 			error:   nil,
@@ -93,7 +93,7 @@ func T[O, T, R any](t *TTask[O, T], operator Operator[T, R]) *TTask[O, R] {
 	}
 }
 
-type Operator[T, R any] func(t *Meta, x *Message[T], next *Step)
+type Operator[T, R any] func(t *Inner, x *Message[T], next *Step)
 
 type Step struct {
 	next   *Step

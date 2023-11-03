@@ -9,7 +9,7 @@ import (
 
 //Sink: write each Task result to a file unsing a separator (default: \n)
 func ToFile(path string, separator ...string) task.Operator[string, string] {
-	return func(m *task.Meta, x *task.Message[string], next *task.Step) {
+	return func(m *task.Inner, x *task.Message[string], next *task.Step) {
 		file, err := utils.OpenOrCreateFile(path)
 		defer file.Close()
 

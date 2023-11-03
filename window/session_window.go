@@ -14,7 +14,7 @@ func SessionWindow[T any](options SWOptions[T]) task.Operator[T, []T] {
 	//store inactivity check goroutines
 	stopIncactivityCheckCh := map[string]chan int{}
 
-	return func(m *task.Meta, x *task.Message[T], next *task.Step) {
+	return func(m *task.Inner, x *task.Message[T], next *task.Step) {
 		meta := storage.GetWindowsMetadata(x.Key)
 		mt := getMessageTime(options.WindowingTime, x)
 		meta = assignMessageToWindows(meta, x, mt)

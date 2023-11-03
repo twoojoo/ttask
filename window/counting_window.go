@@ -18,7 +18,7 @@ func CountingWindow[T any](options CWOptions[T]) task.Operator[T, []T] {
 
 	stopIncactivityCheckCh := map[string]chan int{}
 
-	return func(m *task.Meta, x *task.Message[T], next *task.Step) {
+	return func(m *task.Inner, x *task.Message[T], next *task.Step) {
 		//cancel last inactivity check
 		if stopIncactivityCheckCh[x.Key] != nil {
 			stopIncactivityCheckCh[x.Key] <- 1

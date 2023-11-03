@@ -8,7 +8,7 @@ import (
 )
 
 func fromItem[T any](item T) task.Operator[any, T] {
-	return func(m *task.Meta, x *task.Message[any], next *task.Step) {
+	return func(m *task.Inner, x *task.Message[any], next *task.Step) {
 		m.ExecNext(task.NewMessage(item), next)
 	}
 }
@@ -19,7 +19,7 @@ func FromItem[T any](taskId string, item T) *task.TTask[any, T] {
 }
 
 func fromArray[T any](array []T) task.Operator[any, T] {
-	return func(m *task.Meta, x *task.Message[any], next *task.Step) {
+	return func(m *task.Inner, x *task.Message[any], next *task.Step) {
 		for _, el := range array {
 			m.ExecNext(task.NewMessage(el), next)
 		}
@@ -32,7 +32,7 @@ func FromArray[T any](taskId string, array []T) *task.TTask[any, T] {
 }
 
 func fromString(string string, step ...int) task.Operator[any, string] {
-	return func(m *task.Meta, x *task.Message[any], next *task.Step) {
+	return func(m *task.Inner, x *task.Message[any], next *task.Step) {
 		subStr := ""
 
 		for _, char := range strings.Split(string, "") {
@@ -52,7 +52,7 @@ func FromString(taskId string, string string, step ...int) *task.TTask[any, stri
 }
 
 func fromStringSplit(string string, delimiter string) task.Operator[any, string] {
-	return func(m *task.Meta, x *task.Message[any], next *task.Step) {
+	return func(m *task.Inner, x *task.Message[any], next *task.Step) {
 		for _, subStr := range strings.Split(string, delimiter) {
 			m.ExecNext(task.NewMessage(subStr), next)
 		}
@@ -65,7 +65,7 @@ func FromStringSplit(taskId string, string string, delimiter string) *task.TTask
 }
 
 func fromInterval[T any](size time.Duration, max int, generator func(count int) T)  task.Operator[any, T] {
-	return func(m *task.Meta, x *task.Message[any], next *task.Step) {
+	return func(m *task.Inner, x *task.Message[any], next *task.Step) {
 		counter := 0
 
 		for range time.Tick(size) {

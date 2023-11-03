@@ -7,11 +7,11 @@ import (
 )
 
 // Task metadata and methods to be used inside operators.
-type Meta struct {
+type Inner struct {
 	Context    context.Context
 	taskId     string
 	lastResult any
-	catcher    func(t *Meta, e error)
+	catcher    func(t *Inner, e error)
 	error      error
 }
 
@@ -21,7 +21,7 @@ type Meta struct {
 // Returining immediatelly after calling this funciton is highly suggested in order to avoid
 // unwanted code executions (returned value doesn't matter).
 // If the Catch method of the Task isn't used, the error will be lost.
-func (m *Meta) Error(e error, decorators ...any) {
+func (m *Inner) Error(e error, decorators ...any) {
 	if len(decorators) > 0 {
 		dec := ""
 		for i, d := range decorators {
@@ -41,7 +41,7 @@ func (m *Meta) Error(e error, decorators ...any) {
 // Trigger the next Task step.
 // Use this in a raw Operator to handle the Task flow in a custom way
 // (NOT TYPE SAFE)
-func (m *Meta) ExecNext(x any, next *Step) {
+func (m *Inner) ExecNext(x any, next *Step) {
 	m.lastResult = x
 
 	if m.error != nil {
@@ -71,6 +71,6 @@ func (m *Meta) ExecNext(x any, next *Step) {
 	nextActionValue.Call(argsValue)
 }
 
-func (m Meta) TaskID() string {
+func (m Inner) TaskID() string {
 	return m.taskId
 }

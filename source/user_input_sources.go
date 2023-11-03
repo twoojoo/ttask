@@ -10,7 +10,7 @@ import (
 )
 
 func fromReadLine(prompt string) task.Operator[any, string] {
-	return func(m *task.Meta, x *task.Message[any], next *task.Step) {
+	return func(m *task.Inner, x *task.Message[any], next *task.Step) {
 		reader := bufio.NewReader(os.Stdin)
 
 		fmt.Print(prompt)
@@ -32,7 +32,7 @@ func FromReadline(taskId string, prompt string) *task.TTask[any, string] {
 }
 
 func fromReadChar(prompt string) task.Operator[any, rune] {
-	return func(m *task.Meta, x *task.Message[any], next *task.Step) {
+	return func(m *task.Inner, x *task.Message[any], next *task.Step) {
 		reader := bufio.NewReader(os.Stdin)
 
 		fmt.Print(prompt)
