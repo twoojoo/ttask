@@ -1,37 +1,39 @@
 package ttask
 
-// import (
-// 	"log"
-// 	"time"
-// )
+import (
+	"log"
+	"time"
+)
 
-// func assignMessageToWindows[T any](
-// 	meta []storage.WindowMeta,
-// 	item *Message[T],
-// 	messageTime time.Time,
-// ) []storage.WindowMeta {
-// 	m := []storage.WindowMeta{}
-// 	t := messageTime.UnixMilli()
+func assignMessageToWindows[T any](
+	meta []windowMeta,
+	item *Message[T],
+	messageTime time.Time,
+) []windowMeta {
+	m := []windowMeta{}
 
-// 	for i := range meta {
-// 		if t >= meta[i].Start && (meta[i].End == 0 || t < meta[i].End) {
-// 			m = append(m, meta[i])
-// 		}
-// 	}
+	for i := range meta {
+		afterStart := messageTime.After(meta[i].Start) || meta[i].Start.Equal(meta[i].Start)
+		beforeEnd := meta[i].End.IsZero() || messageTime.Before(meta[i].End)
 
-// 	return m
-// }
+		if afterStart && beforeEnd {
+			m = append(m, meta[i])
+		}
+	}
 
-// func getMessageTime[T any](wTime WindowingTime, msg *Message[T]) time.Time {
-// 	switch wTime {
-// 	case EventTime:
-// 		if msg.EventTime.IsZero() {
-// 			log.Println("!> event time not set - fallback on processing time")
-// 			return time.Now()
-// 		}
-// 	case InjestionTime:
-// 		return msg.GetInjestionTime()
-// 	}
+	return m
+}
 
-// 	return time.Now()
-// }
+func getMessageTime[T any](wTime WindowingTime, msg *Message[T]) time.Time {
+	switch wTime {
+	case EventTime:
+		if msg.EventTime.IsZero() {
+			log.Println("!> event time not set - fallback on processing time")
+			return time.Now()
+		}
+	case InjestionTime:
+		return msg.GetInjestionTime()
+	}
+
+	return time.Now()
+}

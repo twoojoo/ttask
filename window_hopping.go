@@ -1,95 +1,131 @@
 package ttask
 
-// import (
-// 	"time"
+import (
+	"time"
+)
 
-// 	"github.com/twoojoo/ttask/storage"
-// )
+func HoppingWindow[T any](id string, options HWOptions[T]) Operator[T, []T] {
+	parseHWOptions(&options)
 
-// func HoppingWindow[T any](options HWOptions[T]) Operator[T, []T] {
-// 	parseHWOptions(&options)
-// 	storage := storage.NewStorageInterface(&options.Storage)
+	first := true
+	var nextStart time.Time
 
-// 	first := true
-// 	nextStart := int64(0)
+	return func(i *Inner, x *Message[T], next *Step) {
+		if first {
+			first = false
+			go startWinLoop[T](options, func() {
+				start := time.Now()
+				nextStart = start
 
-// 	return func(inner *Inner, x *Message[T], next *Step) {
-// 		if first {
-// 			first = false
-// 			go startWinLoop[T](options, func(start int64) {
-// 				nextStart = start
+				keys, err := getKeys(i.storage, id)
+				if err != nil {
+					i.Error(err)
+					return
+				}
 
-// 				for _, k := range storage.GetKeys() {
-// 					storage.StartNewEmptyWindow(k, nextStart)
-// 				}
+				for _, k := range keys {
+					_, err := startNewEmptyWindow(i.storage, id, k, nextStart)
+					if err != nil {
+						i.Error(err)
+						return
+					}
+				}
 
-// 			}, func(end int64) {
-// 				keys := storage.GetKeys()
+			}, func() {
+				end := time.Now()
 
-// 				for _, k := range keys {
-// 					meta := storage.GetWindowsMetadata(k)
+				keys, err := getKeys(i.storage, id)
+				if err != nil {
+					i.Error(err)
+					return
+				}
 
-// 					for i := range meta {
-// 						if meta[i].End == 0 && meta[i].Start <= (end-options.Size.Milliseconds()) {
-// 							storage.CloseWindow(x.Key, meta[i].Id, options.Watermark, func(items []Message[T]) {
-// 								if len(items) > 0 {
-// 									inner.ExecNext(task.ToArray(x, items), next)
-// 								}
-// 							})
-// 						}
-// 					}
-// 				}
-// 			})
-// 		}
+				for _, k := range keys {
+					meta, err := getWindowsMetadataByKey(i.storage, id, k)
+					if err != nil {
+						i.Error(err)
+						return
+					}
 
-// 		//pushing item
+					for j := range meta {
+						if meta[j].End.IsZero() && (meta[j].Start.Before(end.Add(-options.Size)) || meta[j].Start.Equal(end.Add(-options.Size))) {
+							closeWindow(i.storage, id, x.Key, meta[j].Id, options.Watermark, func(items []Message[T]) {
+								if len(items) > 0 {
+									i.ExecNext(toArray(x, items), next)
+								}
+							})
+						}
+					}
+				}
+			})
+		}
 
-// 		//wait for nextStart to be set by the loop
-// 		for {
-// 			if nextStart != 0 {
-// 				break
-// 			}
-// 		}
+		//pushing item
 
-// 		meta := storage.GetWindowsMetadata(x.Key)
-// 		mt := getMessageTime(options.WindowingTime, x)
-// 		meta = assignMessageToWindows(meta, x, mt)
+		//wait for nextStart to be set by the loop
+		for {
+			if !nextStart.IsZero() {
+				break
+			}
+		}
 
-// 		// if no window for this key, just create 1 with the last start ts
-// 		if len(meta) == 0 && !first {
-// 			storage.StartNewWindow(x.Key, *x, nextStart)
-// 		} else {
-// 			lastExists := false
+		meta, err := getWindowsMetadataByKey(i.storage, id, x.Key)
+		if err != nil {
+			i.Error(err)
+			return
+		}
 
-// 			// push item to all windows for that key that are not closed yet
-// 			for _, m := range meta {
-// 				if m.End == 0 {
-// 					storage.PushItemToWindow(x.Key, m.Id, *x)
-// 				}
+		mt := getMessageTime(options.WindowingTime, x)
+		meta = assignMessageToWindows(meta, x, mt)
 
-// 				// check if the next window is already created
-// 				if m.Start >= nextStart {
-// 					lastExists = true
-// 				}
-// 			}
+		// if no window for this key, just create 1 with the last start ts
+		if len(meta) == 0 && !first {
+			_, err := startNewWindow(i.storage, id, x.Key, *x, nextStart)
+			if err != nil {
+				i.Error(err)
+				return
+			}
+		} else {
+			lastExists := false
 
-// 			// if next window is not yet created, then create it
-// 			if !lastExists {
-// 				storage.StartNewWindow(x.Key, *x, nextStart)
-// 			}
-// 		}
-// 	}
-// }
+			// push item to all windows for that key that are not closed yet
+			for _, m := range meta {
+				if m.End.IsZero() {
+					_, err := pushMessageToWindow(i.storage, id, x.Key, m.Id, *x)
+					if err != nil {
+						i.Error(err)
+						return
+					}
+				}
 
-// func startWinLoop[T any](options HWOptions[T], onStart func(start int64), onClose func(end int64)) {
-// 	for {
-// 		onStart(time.Now().UnixMilli())
+				// check if the next window is already created
+				if m.Start.After(nextStart) || m.Start.Equal(nextStart) {
+					lastExists = true
+				}
+			}
 
-// 		go func() {
-// 			time.Sleep(options.Size)
-// 			onClose(time.Now().UnixMilli())
-// 		}()
+			// if next window is not yet created, then create it
+			if !lastExists {
+				_, err := startNewWindow(i.storage, id, x.Key, *x, nextStart)
+				if err != nil {
+					i.Error(err)
+					return
+				}
 
-// 		time.Sleep(options.Hop)
-// 	}
-// }
+			}
+		}
+	}
+}
+
+func startWinLoop[T any](options HWOptions[T], onStart func(), onClose func()) {
+	for {
+		onStart()
+
+		go func() {
+			time.Sleep(options.Size)
+			onClose()
+		}()
+
+		time.Sleep(options.Hop)
+	}
+}

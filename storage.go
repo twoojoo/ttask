@@ -84,8 +84,23 @@ func getWindowsMetadataByKey(s Storage, cpId string, key string) ([]windowMeta, 
 	return s.getWindowsMetadataByKey(cpId, key)
 }
 
-func closeWindow(s Storage, cpId string, key string, winId string) error {
-	return s.closeWindow(cpId, key, winId)
+func closeWindow[T any](s Storage, cpId string, key string, winId string, watermark time.Duration, onFlush func(items []Message[T])) error {
+	err := s.closeWindow(cpId, key, winId)
+	if err != nil {
+		return err
+	}
+
+	go func() {
+		time.Sleep(watermark)
+		items, err := flushWindow[T](s, cpId, key, winId)
+		if err != nil {
+			panic(err)
+		}
+
+		onFlush(items)
+	}()
+
+	return nil
 }
 
 func flushWindow[T any](s Storage, cpId string, key string, winId string) ([]Message[T], error) {
@@ -111,6 +126,6 @@ func getWindowSize(s Storage, cpId string, key string, winId string) (int, error
 	return s.getWindowSize(cpId, key, winId)
 }
 
-func getKeys(cpId string, s Storage) ([]string, error) {
+func getKeys(s Storage, cpId string) ([]string, error) {
 	return s.getKeys(cpId)
 }

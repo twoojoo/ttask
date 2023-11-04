@@ -5,17 +5,14 @@ import (
 	"log"
 	"time"
 
-	. "github.com/twoojoo/ttask/operator"
-	. "github.com/twoojoo/ttask/source"
-	. 
-	. "github.com/twoojoo/ttask/window"
+	. "github.com/twoojoo/ttask"
 )
 
 func main() {
 	T(T(T(
 		FromInterval("thw", 1000*time.Millisecond, 100, func(count int) int { return count }),
 		WithCustomKey(func(x int) string { return "default" })),
-		HoppingWindow(HWOptions[int]{
+		HoppingWindow("win-1", HWOptions[int]{
 			Size: 2100 * time.Millisecond,
 			Hop:  600 * time.Millisecond,
 		})),
