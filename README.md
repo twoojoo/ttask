@@ -33,12 +33,7 @@ Even if it's not idiomatic, I suggest to import ttask packages in this way, othe
 
 ```go
 import (
-	. "github.com/twoojoo/ttask/operator"
-	. "github.com/twoojoo/ttask/source"
-	. "github.com/twoojoo/ttask/task"
-	. "github.com/twoojoo/ttask/sink"
-	. "github.com/twoojoo/ttask/window"
-	. "github.com/twoojoo/ttask/storage"
+	. "github.com/twoojoo/ttask/"
 )
 ```
 
