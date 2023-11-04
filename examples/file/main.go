@@ -5,7 +5,7 @@ import (
 	"log"
 	"strings"
 
-	. "github.com/twoojoo/ttask"
+	"github.com/twoojoo/ttask"
 )
 
 func main() {
@@ -14,16 +14,16 @@ func main() {
 	in := "./examples/file/in.txt"
 	out := "./examples/file/out.txt"
 
-	T(T(T(T(T(
-		FromFile("t1", in),
-		Print[string]("#1 - received:\t\t")),
-		Map(func(x string) string {
+	ttask.T(ttask.T(ttask.T(ttask.T(ttask.T(
+		ttask.FromFile("t1", in),
+		ttask.Print[string]("#1 - received:\t\t")),
+		ttask.Map(func(x string) string {
 			return strings.ToUpper(x)
 		})),
-		Print[string]("#2 - transformed:\t")),
-		ToFile(out, "|")),
-		Print[string]("#3 - written:\t\t"),
-	).Catch(func(i *Inner, e error) {
+		ttask.Print[string]("#2 - transformed:\t")),
+		ttask.ToFile(out, "|")),
+		ttask.Print[string]("#3 - written:\t\t"),
+	).Catch(func(i *ttask.Inner, e error) {
 		log.Fatal(e)
 	}).Run(ctx)
 }
