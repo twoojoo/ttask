@@ -17,7 +17,7 @@ func fromReader(r io.Reader, bufSize int) Operator[any, []byte] {
 					return
 				}
 
-				inner.ExecNext(newMessage(buf[:n]), next)
+				inner.ExecNext(NewMessage(buf[:n]), next)
 			}
 		}
 	}

@@ -26,7 +26,7 @@ func (t *TTask[O, T]) run(c context.Context, x ...O) {
 	var msg any
 	msg = newEmptyMessage()
 	if len(x) > 0 {
-		msg = newMessage[O](x[0])
+		msg = NewMessage[O](x[0])
 	}
 
 	t.inner.ExecNext(msg, t.first)

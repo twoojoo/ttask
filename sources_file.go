@@ -20,7 +20,7 @@ func fromFile(path string) Operator[any, string] {
 
 		for scanner.Scan() {
 			line := scanner.Text()
-			inner.ExecNext(newMessage(line), next)
+			inner.ExecNext(NewMessage(line), next)
 		}
 
 		if err := scanner.Err(); err != nil {

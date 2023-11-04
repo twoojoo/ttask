@@ -1,10 +1,8 @@
 package ttask
 
 import (
-	// "bytes"
 	"encoding/json"
 	"fmt"
-	// "encoding/gob"
 	"time"
 
 	"github.com/google/uuid"
@@ -19,7 +17,7 @@ type Message[T any] struct {
 	Value         T
 }
 
-func newMessage[T any](value T) *Message[T] {
+func NewMessage[T any](value T) *Message[T] {
 	now := time.Now()
 	return &Message[T]{
 		Id:            uuid.NewString(),

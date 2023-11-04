@@ -20,7 +20,7 @@ func fromKafka(consumer *kafka.Consumer, logger bool, timeout ...time.Duration) 
 		for {
 			msg, err := consumer.ReadMessage(to)
 			if err == nil {
-				tMsg := newMessage(KafkaMessage[[]byte]{
+				tMsg := NewMessage(KafkaMessage[[]byte]{
 					TopicPartition: msg.TopicPartition,
 					Key:            string(msg.Key),
 					Value:          msg.Value,

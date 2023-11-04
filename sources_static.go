@@ -7,7 +7,7 @@ import (
 
 func fromItem[T any](item T) Operator[any, T] {
 	return func(inner *Inner, x *Message[any], next *Step) {
-		inner.ExecNext(newMessage(item), next)
+		inner.ExecNext(NewMessage(item), next)
 	}
 }
 
@@ -19,7 +19,7 @@ func FromItem[T any](taskId string, item T) *TTask[any, T] {
 func fromArray[T any](array []T) Operator[any, T] {
 	return func(inner *Inner, x *Message[any], next *Step) {
 		for _, el := range array {
-			inner.ExecNext(newMessage(el), next)
+			inner.ExecNext(NewMessage(el), next)
 		}
 	}
 }
@@ -37,7 +37,7 @@ func fromString(string string, step ...int) Operator[any, string] {
 			subStr += char
 
 			if len(subStr) >= step[0] {
-				inner.ExecNext(newMessage(subStr), next)
+				inner.ExecNext(NewMessage(subStr), next)
 				subStr = ""
 			}
 		}
@@ -52,7 +52,7 @@ func FromString(taskId string, string string, step ...int) *TTask[any, string] {
 func fromStringSplit(string string, delimiter string) Operator[any, string] {
 	return func(inner *Inner, x *Message[any], next *Step) {
 		for _, subStr := range strings.Split(string, delimiter) {
-			inner.ExecNext(newMessage(subStr), next)
+			inner.ExecNext(NewMessage(subStr), next)
 		}
 	}
 }
@@ -69,7 +69,7 @@ func fromInterval[T any](size time.Duration, max int, generator func(count int) 
 		for range time.Tick(size) {
 			value := generator(counter)
 
-			inner.ExecNext(newMessage(value), next)
+			inner.ExecNext(NewMessage(value), next)
 
 			if max != 0 && counter == max-1 {
 				break

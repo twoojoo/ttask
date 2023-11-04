@@ -21,7 +21,7 @@ func fromReadLine(prompt string) Operator[any, string] {
 
 		line = strings.Split(line, "\n")[0]
 
-		inner.ExecNext(newMessage(line), next)
+		inner.ExecNext(NewMessage(line), next)
 	}
 }
 
@@ -40,7 +40,7 @@ func fromReadChar(prompt string) Operator[any, rune] {
 			return
 		}
 
-		inner.ExecNext(newMessage(rune), next)
+		inner.ExecNext(NewMessage(rune), next)
 	}
 }
 
