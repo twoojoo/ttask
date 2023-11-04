@@ -26,5 +26,3 @@ func startInactivityCheck(inner *Inner, maxInactivity time.Duration, onInactive 
 
 	return ch
 }
-
-// func stopInactivityCheck()
