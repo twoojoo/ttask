@@ -33,7 +33,7 @@ Even if it's not idiomatic, I suggest to import ttask packages in this way, othe
 
 ```go
 import (
-	. "github.com/twoojoo/ttask/"
+	. "github.com/twoojoo/ttask"
 )
 ```
 
