@@ -44,9 +44,31 @@ func ToStdout[T any](toString func(x T) string) Operator[T, T] {
 	})
 }
 
+func ToStdoutln[T any](toString func(x T) string) Operator[T, T] {
+	return TapRaw(func(inner *Inner, x *Message[T]) {
+		_, err := os.Stdout.WriteString(toString(x.Value) + "\n")
+
+		if err != nil {
+			inner.Error(err)
+			return
+		}
+	})
+}
+
 func ToStderr[T any](toString func(x T) string) Operator[T, T] {
 	return TapRaw(func(inner *Inner, x *Message[T]) {
 		_, err := os.Stdout.WriteString(toString(x.Value))
+
+		if err != nil {
+			inner.Error(err)
+			return
+		}
+	})
+}
+
+func ToStderrln[T any](toString func(x T) string) Operator[T, T] {
+	return TapRaw(func(inner *Inner, x *Message[T]) {
+		_, err := os.Stdout.WriteString(toString(x.Value) + "\n")
 
 		if err != nil {
 			inner.Error(err)
