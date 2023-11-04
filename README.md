@@ -239,11 +239,8 @@ You can find an example [here](./examples/custom/main.go)
 
 - fill up the readme file with missing stuff (windows, storage, etc..)
 - better Memory storage with mutexes
-- write a Redis storage for windows operators
-- write a Rocksdb storage for windows operators
-- write a Cassandra storage for windows operators
-- improve persistence/recovery in the task
-	- maybe enhancing storage systems
-	- using checkpoints (e.g. Checkpoint(Map(func (..) { ...})))
+- write a Redis storage for windows and checkpoints
+- write a Rocksdb storage for windows and checkpoints
+- write a Cassandra storage for windows and checkpoints
 - add WithTimeout and WithDeadline context operators
 - add more sources and sinks (e.g. CSV, RabbitMQ, Apache Pulsar, etc..)
