@@ -17,7 +17,7 @@ func main() {
 			log.Println("> received", x)
 		})),
 		CountingWindow("w1", CWOptions[string]{
-			MaxInactivity: 100 * time.Millisecond,
+			MaxInactivity: 2 * time.Second,
 			Size:          3,
 		})),
 		ReduceArray("", func(acc *string, x string) string {
