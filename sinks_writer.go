@@ -35,7 +35,7 @@ func ToWriterCount[T any](w io.Writer, toBytes func(x T) []byte) Operator[T, int
 	})
 }
 
-// Print to the standard output.
+// Sink: Print to the standard output.
 // Use toString to temporarly transform the message into a string.
 func ToStdout[T any](toString func(x T) string) Operator[T, T] {
 	return TapRaw(func(inner *Inner, x *Message[T]) {
@@ -48,7 +48,7 @@ func ToStdout[T any](toString func(x T) string) Operator[T, T] {
 	})
 }
 
-// Print to the standard output appending with a new line char.
+// Sink: Print to the standard output appending with a new line char.
 // Use toString to temporarly transform the message into a string.
 func ToStdoutln[T any](toString func(x T) string) Operator[T, T] {
 	return TapRaw(func(inner *Inner, x *Message[T]) {
@@ -61,7 +61,7 @@ func ToStdoutln[T any](toString func(x T) string) Operator[T, T] {
 	})
 }
 
-// Print to the standard error.
+// Sink: Print to the standard error.
 // Use toString to temporarly transform the message into a string.
 func ToStderr[T any](toString func(x T) string) Operator[T, T] {
 	return TapRaw(func(inner *Inner, x *Message[T]) {
@@ -74,7 +74,7 @@ func ToStderr[T any](toString func(x T) string) Operator[T, T] {
 	})
 }
 
-// Print to the standard error appending with a new line char.
+// Sink: Print to the standard error appending with a new line char.
 // Use toString to temporarly transform the message into a string.
 func ToStderrln[T any](toString func(x T) string) Operator[T, T] {
 	return TapRaw(func(inner *Inner, x *Message[T]) {
