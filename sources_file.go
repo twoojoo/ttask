@@ -8,7 +8,6 @@ import (
 func fromFile(path string) Operator[any, string] {
 	return func(inner *Inner, _ *Message[any], next *Step) {
 		file, err := os.Open(path)
-
 		if err != nil {
 			inner.Error(err)
 			return
