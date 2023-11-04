@@ -5,16 +5,13 @@ import (
 	"log"
 	"time"
 
-	. "github.com/twoojoo/ttask/operator"
-	. "github.com/twoojoo/ttask/source"
-	. 
-	. "github.com/twoojoo/ttask/window"
+	. "github.com/twoojoo/ttask"
 )
 
 func main() {
 	T(T(
 		FromInterval("t1", time.Second, 10, func(count int) int { return count }),
-		TumblingWindow(TWOptions[int]{
+		TumblingWindow("win-1", TWOptions[int]{
 			Size:          1500 * time.Millisecond,
 			WindowingTime: EventTime,
 		})),
