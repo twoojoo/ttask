@@ -8,6 +8,11 @@ import (
 	"github.com/twoojoo/ttask"
 )
 
+/**
+ * NOTE: importing in an idiomatic way
+ * makes everything too verbose
+ * */
+
 func main() {
 	ctx := context.Background()
 
