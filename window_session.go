@@ -11,7 +11,9 @@ func SessionWindow[T any](id string, options SWOptions[T]) Operator[T, []T] {
 	stopIncactivityCheckCh := map[string]chan int{}
 
 	return func(i *Inner, x *Message[T], next *Step) {
-		meta, err := getWindowsMetadataByKey(i.storage, id, x.Key)
+		sw := newStorageWrapper[T](i)
+
+		meta, err := sw.getWindowsMetadataByKey(id, x.Key)
 		if err != nil {
 			i.Error(err)
 			return
@@ -26,15 +28,15 @@ func SessionWindow[T any](id string, options SWOptions[T]) Operator[T, []T] {
 		}
 
 		if len(meta) > 0 { // window exists
-			_, err := pushMessageToWindow(i.storage, id, x.Key, meta[0].Id, *x)
+			_, err := sw.pushMessageToWindow(id, x.Key, meta[0].Id, *x)
 			if err != nil {
 				i.Error(err)
 				return
 			}
 
 			//start inactivity check and store stopping channel
-			stopIncactivityCheckCh[x.Key] = startInactivityCheck(options.MaxInactivity, func() {
-				meta, err := getWindowMetadata(i.storage, id, x.Key, meta[0].Id)
+			stopIncactivityCheckCh[x.Key] = startInactivityCheck(i, options.MaxInactivity, func() {
+				meta, err := sw.getWindowMetadata(id, x.Key, meta[0].Id)
 				if err != nil {
 					i.Error(err)
 					return
@@ -42,7 +44,7 @@ func SessionWindow[T any](id string, options SWOptions[T]) Operator[T, []T] {
 
 				//on incactivity: close
 				if meta.End.IsZero() && (meta.Last.Before(time.Now().Add(-options.MaxInactivity)) || meta.Last.Equal(time.Now().Add(-options.MaxInactivity))) {
-					err := closeWindow(i.storage, id, x.Key, meta.Id, options.Watermark, func(items []Message[T]) {
+					err := sw.closeWindow(id, x.Key, meta.Id, options.Watermark, func(items []Message[T]) {
 						if len(items) > 0 {
 							i.ExecNext(toArray(x, items), next)
 						}
@@ -55,15 +57,15 @@ func SessionWindow[T any](id string, options SWOptions[T]) Operator[T, []T] {
 				}
 			})
 		} else { // window doesn't exist
-			meta, err := startNewWindow(i.storage, id, x.Key, *x)
+			meta, err := sw.startNewWindow(id, x.Key, *x)
 			if err != nil {
 				i.Error(err)
 				return
 			}
 
 			//start inactivity check and store stopping channel
-			stopIncactivityCheckCh[x.Key] = startInactivityCheck(options.MaxInactivity, func() {
-				meta, err := getWindowMetadata(i.storage, id, x.Key, meta.Id)
+			stopIncactivityCheckCh[x.Key] = startInactivityCheck(i, options.MaxInactivity, func() {
+				meta, err := sw.getWindowMetadata(id, x.Key, meta.Id)
 				if err != nil {
 					i.Error(err)
 					return
@@ -71,7 +73,7 @@ func SessionWindow[T any](id string, options SWOptions[T]) Operator[T, []T] {
 
 				//on incactivity: close
 				if meta.End.IsZero() && (meta.Last.Before(time.Now().Add(-options.MaxInactivity)) || meta.Last.Equal(time.Now().Add(-options.MaxInactivity))) {
-					err := closeWindow(i.storage, id, x.Key, meta.Id, options.Watermark, func(items []Message[T]) {
+					err := sw.closeWindow(id, x.Key, meta.Id, options.Watermark, func(items []Message[T]) {
 						if len(items) > 0 {
 							i.ExecNext(toArray(x, items), next)
 						}
@@ -88,7 +90,7 @@ func SessionWindow[T any](id string, options SWOptions[T]) Operator[T, []T] {
 			go func() {
 				time.Sleep(options.MaxSize)
 
-				meta, err := getWindowMetadata(i.storage, id, x.Key, meta.Id)
+				meta, err := sw.getWindowMetadata(id, x.Key, meta.Id)
 				if err != nil {
 					i.Error(err)
 					return
@@ -96,7 +98,7 @@ func SessionWindow[T any](id string, options SWOptions[T]) Operator[T, []T] {
 
 				//on max size: close
 				if meta.End.IsZero() {
-					err := closeWindow(i.storage, id, x.Key, meta.Id, options.Watermark, func(items []Message[T]) {
+					err := sw.closeWindow(id, x.Key, meta.Id, options.Watermark, func(items []Message[T]) {
 						if len(items) > 0 {
 							i.ExecNext(toArray(x, items), next)
 						}

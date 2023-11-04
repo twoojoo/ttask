@@ -11,15 +11,18 @@ package ttask
 // ..[----------------].........[------------]......[----------
 func CountingWindow[T any](id string, options CWOptions[T]) Operator[T, []T] {
 	parseCWOptions(&options)
+
 	stopIncactivityCheckCh := map[string]chan int{}
 
 	return func(i *Inner, x *Message[T], next *Step) {
+		sw := newStorageWrapper[T](i)
+
 		//cancel last inactivity check
 		if stopIncactivityCheckCh[x.Key] != nil {
 			stopIncactivityCheckCh[x.Key] <- 1
 		}
 
-		meta, err := getWindowsMetadataByKey(i.storage, id, x.Key)
+		meta, err := sw.getWindowsMetadataByKey(id, x.Key)
 		if err != nil {
 			i.Error(err)
 			return
@@ -29,7 +32,7 @@ func CountingWindow[T any](id string, options CWOptions[T]) Operator[T, []T] {
 		if len(meta) > 1 {
 			panic("there should be only 1 window per key in counting window")
 		} else if len(meta) == 0 {
-			newWinMeta, err := startNewWindow(i.storage, id, x.Key, *x)
+			newWinMeta, err := sw.startNewWindow(id, x.Key, *x)
 			if err != nil {
 				i.Error(err)
 				return
@@ -38,7 +41,7 @@ func CountingWindow[T any](id string, options CWOptions[T]) Operator[T, []T] {
 			meta = append(meta, newWinMeta)
 			size = 1
 		} else {
-			size, err = pushMessageToWindow(i.storage, id, x.Key, meta[0].Id, *x)
+			size, err = sw.pushMessageToWindow(id, x.Key, meta[0].Id, *x)
 			if err != nil {
 				i.Error(err)
 				return
@@ -47,8 +50,8 @@ func CountingWindow[T any](id string, options CWOptions[T]) Operator[T, []T] {
 
 		// start new inactivity check
 		if options.MaxInactivity > 0 && options.Size > 1 {
-			stopIncactivityCheckCh[x.Key] = startInactivityCheck(options.MaxInactivity, func() {
-				items, err := flushWindow[T](i.storage, id, x.Key, meta[0].Id)
+			stopIncactivityCheckCh[x.Key] = startInactivityCheck(i, options.MaxInactivity, func() {
+				items, err := sw.flushWindow(id, x.Key, meta[0].Id)
 				if err != nil {
 					i.Error(err)
 					return
@@ -71,7 +74,7 @@ func CountingWindow[T any](id string, options CWOptions[T]) Operator[T, []T] {
 			}
 
 			// storage.CloseWindow(x.Key, meta[0].Id)
-			items, err := flushWindow[T](i.storage, id, x.Key, meta[0].Id)
+			items, err := sw.flushWindow(id, x.Key, meta[0].Id)
 			if err != nil {
 				i.Error(err)
 				return

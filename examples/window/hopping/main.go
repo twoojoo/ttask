@@ -10,7 +10,7 @@ import (
 
 func main() {
 	T(T(T(
-		FromInterval("thw", 1000*time.Millisecond, 100, func(count int) int { return count }),
+		FromInterval("thw", 1000*time.Millisecond, 10, func(count int) int { return count }),
 		WithCustomKey(func(x int) string { return "default" })),
 		HoppingWindow("win-1", HWOptions[int]{
 			Size: 2100 * time.Millisecond,
@@ -20,8 +20,6 @@ func main() {
 	).Catch(func(i *Inner, e error) {
 		log.Fatal(e)
 	}).Run(context.Background())
-
-	time.Sleep(2 * time.Second)
 }
 
 /**

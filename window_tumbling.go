@@ -15,36 +15,42 @@ func TumblingWindow[T any](id string, options TWOptions[T]) Operator[T, []T] {
 	first := true
 
 	return func(i *Inner, x *Message[T], next *Step) {
+		sw := newStorageWrapper[T](i)
+
 		if first {
 			go func() {
+				i.wg.Add(1)
 				for range time.Tick(options.Size) {
+
 					now := time.Now()
 
-					keys, err := getKeys(i.storage, id)
+					keys, err := sw.getKeys(id)
 					if err != nil {
 						i.Error(err)
 						return
 					}
 
 					for _, k := range keys {
-						meta, err := getWindowsMetadataByKey(i.storage, id, k)
+						meta, err := sw.getWindowsMetadataByKey(id, k)
 						if err != nil {
 							i.Error(err)
 							return
 						}
 
 						for j := range meta {
-							closeWindow(i.storage, id, x.Key, meta[j].Id, options.Watermark, func(items []Message[T]) {
+							sw.closeWindow(id, x.Key, meta[j].Id, options.Watermark, func(items []Message[T]) {
 								if len(items) > 0 {
 									i.ExecNext(toArray(x, items), next)
 								}
 							})
 						}
 
-						startNewEmptyWindow(i.storage, id, k, now)
+						sw.startNewEmptyWindow(id, k, now)
 					}
 
 					first = false
+
+					// i.wg.Done()
 				}
 			}()
 		}
@@ -55,7 +61,7 @@ func TumblingWindow[T any](id string, options TWOptions[T]) Operator[T, []T] {
 			}
 		}
 
-		meta, err := getWindowsMetadataByKey(i.storage, id, x.Key)
+		meta, err := sw.getWindowsMetadataByKey(id, x.Key)
 		if err != nil {
 			i.Error(err)
 			return
@@ -65,29 +71,17 @@ func TumblingWindow[T any](id string, options TWOptions[T]) Operator[T, []T] {
 		meta = assignMessageToWindows(meta, x, mt)
 
 		if len(meta) == 0 {
-			_, err := startNewWindow(i.storage, id, x.Key, *x)
+			_, err := sw.startNewWindow(id, x.Key, *x)
 			if err != nil {
 				i.Error(err)
 				return
 			}
 		} else {
-			_, err := pushMessageToWindow(i.storage, id, x.Key, meta[0].Id, *x)
+			_, err := sw.pushMessageToWindow(id, x.Key, meta[0].Id, *x)
 			if err != nil {
 				i.Error(err)
 				return
 			}
 		}
 	}
-}
-
-func filterClosedWindowMeta(meta []windowMeta) []windowMeta {
-	filtered := []windowMeta{}
-
-	for i := range meta {
-		if meta[i].End.IsZero() {
-			filtered = append(filtered, meta[i])
-		}
-	}
-
-	return filtered
 }

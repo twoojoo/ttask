@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"reflect"
+	"sync"
 )
 
 // Task metadata and methods to be used inside operators.
@@ -14,6 +15,7 @@ type Inner struct {
 	catcher    func(t *Inner, e error)
 	error      error
 	storage    Storage
+	wg         sync.WaitGroup
 }
 
 func (i *Inner) getStorage() Storage {
@@ -58,15 +60,10 @@ func (inner *Inner) ExecNext(x any, next *Step) {
 			inner.catcher(inner, inner.error)
 		}
 
-		// msgId := getMessageId(x)
-		// inner.storage.clearCheckpoint(inner.TaskID(), msgId)
-
 		return
 	}
 
 	if next == nil {
-		// msgId := getMessageId(x)
-		// inner.storage.clearCheckpoint(inner.TaskID(), msgId)
 		return
 	}
 

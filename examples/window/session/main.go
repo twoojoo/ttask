@@ -17,8 +17,6 @@ func main() {
 		log.Fatal(e)
 	}).Run(context.Background())
 
-	time.Sleep(2 * time.Second)
-
 	T(T(
 		FromInterval("t1", time.Second, 10, func(count int) int { return count }),
 		SessionWindow("win-1", SWOptions[int]{
@@ -29,6 +27,4 @@ func main() {
 	).Catch(func(i *Inner, e error) {
 		log.Fatal(e)
 	}).Run(context.Background())
-
-	time.Sleep(2 * time.Second)
 }

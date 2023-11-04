@@ -67,8 +67,8 @@ func fromInterval[T any](size time.Duration, max int, generator func(count int) 
 		counter := 0
 
 		for range time.Tick(size) {
-			value := generator(counter)
 
+			value := generator(counter)
 			inner.ExecNext(NewMessage(value), next)
 
 			if max != 0 && counter == max-1 {

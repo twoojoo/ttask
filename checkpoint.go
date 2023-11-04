@@ -16,8 +16,10 @@ func Checkpoint[T, R any](id string, operator Operator[T, R]) Operator[T, R] {
 	first := true
 
 	return func(inner *Inner, x *Message[T], next *Step) {
+		sw := newStorageWrapper[T](inner)
+
 		if first {
-			err := recoverCheckpoint(inner.storage, inner.TaskID(), id, func(m *Message[T]) {
+			err := sw.recoverCheckpoint(inner.TaskID(), id, func(m *Message[T]) {
 				operator(inner, m, next)
 				inner.storage.clearCheckpoint(inner.TaskID(), m.Id, id)
 			})
@@ -29,7 +31,7 @@ func Checkpoint[T, R any](id string, operator Operator[T, R]) Operator[T, R] {
 			first = false
 		}
 
-		storeCheckpoint(inner.storage, inner.TaskID(), id, x)
+		sw.storeCheckpoint(inner.TaskID(), id, x)
 
 		operator(inner, x, next)
 

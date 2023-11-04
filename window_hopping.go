@@ -11,20 +11,22 @@ func HoppingWindow[T any](id string, options HWOptions[T]) Operator[T, []T] {
 	var nextStart time.Time
 
 	return func(i *Inner, x *Message[T], next *Step) {
+		sw := newStorageWrapper[T](i)
+
 		if first {
 			first = false
-			go startWinLoop[T](options, func() {
+			go startWinLoop[T](i, options, func() {
 				start := time.Now()
 				nextStart = start
 
-				keys, err := getKeys(i.storage, id)
+				keys, err := sw.getKeys(id)
 				if err != nil {
 					i.Error(err)
 					return
 				}
 
 				for _, k := range keys {
-					_, err := startNewEmptyWindow(i.storage, id, k, nextStart)
+					_, err := sw.startNewEmptyWindow(id, k, nextStart)
 					if err != nil {
 						i.Error(err)
 						return
@@ -34,14 +36,14 @@ func HoppingWindow[T any](id string, options HWOptions[T]) Operator[T, []T] {
 			}, func() {
 				end := time.Now()
 
-				keys, err := getKeys(i.storage, id)
+				keys, err := sw.getKeys(id)
 				if err != nil {
 					i.Error(err)
 					return
 				}
 
 				for _, k := range keys {
-					meta, err := getWindowsMetadataByKey(i.storage, id, k)
+					meta, err := sw.getWindowsMetadataByKey(id, k)
 					if err != nil {
 						i.Error(err)
 						return
@@ -49,7 +51,7 @@ func HoppingWindow[T any](id string, options HWOptions[T]) Operator[T, []T] {
 
 					for j := range meta {
 						if meta[j].End.IsZero() && (meta[j].Start.Before(end.Add(-options.Size)) || meta[j].Start.Equal(end.Add(-options.Size))) {
-							closeWindow(i.storage, id, x.Key, meta[j].Id, options.Watermark, func(items []Message[T]) {
+							sw.closeWindow(id, x.Key, meta[j].Id, options.Watermark, func(items []Message[T]) {
 								if len(items) > 0 {
 									i.ExecNext(toArray(x, items), next)
 								}
@@ -69,7 +71,7 @@ func HoppingWindow[T any](id string, options HWOptions[T]) Operator[T, []T] {
 			}
 		}
 
-		meta, err := getWindowsMetadataByKey(i.storage, id, x.Key)
+		meta, err := sw.getWindowsMetadataByKey(id, x.Key)
 		if err != nil {
 			i.Error(err)
 			return
@@ -80,7 +82,7 @@ func HoppingWindow[T any](id string, options HWOptions[T]) Operator[T, []T] {
 
 		// if no window for this key, just create 1 with the last start ts
 		if len(meta) == 0 && !first {
-			_, err := startNewWindow(i.storage, id, x.Key, *x, nextStart)
+			_, err := sw.startNewWindow(id, x.Key, *x, nextStart)
 			if err != nil {
 				i.Error(err)
 				return
@@ -91,7 +93,7 @@ func HoppingWindow[T any](id string, options HWOptions[T]) Operator[T, []T] {
 			// push item to all windows for that key that are not closed yet
 			for _, m := range meta {
 				if m.End.IsZero() {
-					_, err := pushMessageToWindow(i.storage, id, x.Key, m.Id, *x)
+					_, err := sw.pushMessageToWindow(id, x.Key, m.Id, *x)
 					if err != nil {
 						i.Error(err)
 						return
@@ -106,7 +108,7 @@ func HoppingWindow[T any](id string, options HWOptions[T]) Operator[T, []T] {
 
 			// if next window is not yet created, then create it
 			if !lastExists {
-				_, err := startNewWindow(i.storage, id, x.Key, *x, nextStart)
+				_, err := sw.startNewWindow(id, x.Key, *x, nextStart)
 				if err != nil {
 					i.Error(err)
 					return
@@ -117,13 +119,17 @@ func HoppingWindow[T any](id string, options HWOptions[T]) Operator[T, []T] {
 	}
 }
 
-func startWinLoop[T any](options HWOptions[T], onStart func(), onClose func()) {
+func startWinLoop[T any](inner *Inner, options HWOptions[T], onStart func(), onClose func()) {
 	for {
 		onStart()
 
+		inner.wg.Add(1)
 		go func() {
 			time.Sleep(options.Size)
+
 			onClose()
+
+			inner.wg.Done()
 		}()
 
 		time.Sleep(options.Hop)

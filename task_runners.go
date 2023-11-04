@@ -16,6 +16,8 @@ func (t *TTask[O, T]) Run(c context.Context) error {
 	t.Lock()
 	t.run(c)
 
+	t.inner.wg.Wait()
+
 	return nil
 }
 

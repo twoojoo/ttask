@@ -1,8 +1,14 @@
 package ttask
 
 import (
+	"bufio"
 	"io"
+	"os"
 )
+
+func FromReader(taskId string, r io.Reader, bufSize int) *TTask[any, []byte] {
+	return Via(Task[any](taskId), fromReader(r, bufSize))
+}
 
 func fromReader(r io.Reader, bufSize int) Operator[any, []byte] {
 	return func(inner *Inner, x *Message[any], next *Step) {
@@ -23,6 +29,16 @@ func fromReader(r io.Reader, bufSize int) Operator[any, []byte] {
 	}
 }
 
-func FromReader(taskId string, r io.Reader, bufSize int) *TTask[any, []byte] {
-	return Via(Task[any](taskId), fromReader(r, bufSize))
+func FromStdin(taskId string) *TTask[any, string] {
+	return Via(Task[any](taskId), fromStdin())
+}
+
+func fromStdin() Operator[any, string] {
+	return func(inner *Inner, x *Message[any], next *Step) {
+		scanner := bufio.NewScanner(os.Stdin)
+
+		for scanner.Scan() {
+			inner.ExecNext(NewMessage(scanner.Text()), next)
+		}
+	}
 }

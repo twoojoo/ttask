@@ -4,11 +4,16 @@ import (
 	"time"
 )
 
-func startInactivityCheck(maxInactivity time.Duration, onInactive func()) chan int {
+func startInactivityCheck(inner *Inner, maxInactivity time.Duration, onInactive func()) chan int {
 	//2 because the first message won't block the calling routine
 	ch := make(chan int, 2)
+	inner.wg.Add(1)
 
 	go func() {
+		defer func() {
+			inner.wg.Done()
+		}()
+
 		time.Sleep(maxInactivity)
 
 		select {
@@ -21,3 +26,5 @@ func startInactivityCheck(maxInactivity time.Duration, onInactive func()) chan i
 
 	return ch
 }
+
+// func stopInactivityCheck()
