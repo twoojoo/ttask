@@ -15,7 +15,7 @@ Working examples in the [examples](./examples) folder.
 - [Sources](#sources)
 - [Sinks](#sinks)
 - [Operators](#operators)
-- [Task flow](#task-flow)
+- [Task inner](#task-inner)
 - [Windowing](#windowing)
 	- [Tumbling window](#tumbling-window)
 	- [Hopping window](#hopping-window)
@@ -191,7 +191,7 @@ Most operators have a so called **raw** version, meaning that it give access to 
 func TapRaw[T any](action func(i *Inner, x *Message[T])) 
 ```
 
-#### Task meta
+#### Task inner
 
 TBD
 
