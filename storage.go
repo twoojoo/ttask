@@ -1,15 +1,39 @@
 package ttask
 
-// import "time"
+import (
+	"time"
+)
 
-type WindowMeta struct {
-	id string
+type window struct {
+	id    string
+	start time.Time
+	end   time.Time
+	last  time.Time
+	elems []any
+}
+
+type windowMeta struct {
+	Id    string
+	Start time.Time
+	End   time.Time
+	Last  time.Time
 }
 
 type Storage interface {
 	storeCheckpoint(taskId string, msgId string, cpId string, msg []byte) error
 	clearCheckpoint(taskId string, msgId string, cpId string) error
 	getCheckpointMessages(taskId string, cpId string) ([][]byte, error)
+
+	startNewEmptyWindow(cpId string, key string, start ...time.Time) (windowMeta, error)
+	startNewWindow(cpId string, key string, msg any, start ...time.Time) (windowMeta, error)
+	pushMessageToWindow(cpId string, key string, winId string, msg any) (int, error)
+	getWindowMetadata(cpId string, key string, winId string) (windowMeta, error)
+	getWindowsMetadataByKey(cpId string, key string) ([]windowMeta, error)
+	closeWindow(cpId string, key string, winId string) error
+	flushWindow(cpId string, key string, winId string) ([]any, error)
+	destroyWindow(cpId string, key string, winId string) error
+	getWindowSize(cpId string, key string, winId string) (int, error)
+	getKeys(cpId string) ([]string, error)
 }
 
 func storeCheckpoint[T any](s Storage, taskId string, cpId string, msg *Message[T]) error {
@@ -33,48 +57,60 @@ func recoverCheckpoint[T any](s Storage, taskId string, cpId string, onMessage f
 		if err != nil {
 			return err
 		}
+
 		onMessage(msg)
 	}
 
 	return nil
 }
 
-// func startNewEmptyWindow(s Storage, key string, start time.Time) WindowMeta {
+func startNewEmptyWindow(s Storage, cpId string, key string, start ...time.Time) (windowMeta, error) {
+	return s.startNewEmptyWindow(cpId, key, start...)
+}
 
-// }
+func startNewWindow[T any](s Storage, cpId string, key string, msg Message[T], start ...time.Time) (windowMeta, error) {
+	return s.startNewWindow(cpId, key, msg, start...)
+}
 
-// func startNewWindow[T any](s Storage, key string, msg Message[T], start time.Time) WindowMeta {
+func pushMessageToWindow[T any](s Storage, cpId string, key string, winId string, msg Message[T]) (int, error) {
+	return s.pushMessageToWindow(cpId, key, winId, msg)
+}
 
-// }
+func getWindowMetadata(s Storage, cpId string, key string, winId string) (windowMeta, error) {
+	return s.getWindowMetadata(cpId, key, winId)
+}
 
-// func pushMessageToWindow[T any](s Storage, key string, winId string, msg Message[T]) int {
+func getWindowsMetadataByKey(s Storage, cpId string, key string) ([]windowMeta, error) {
+	return s.getWindowsMetadataByKey(cpId, key)
+}
 
-// }
+func closeWindow(s Storage, cpId string, key string, winId string) error {
+	return s.closeWindow(cpId, key, winId)
+}
 
-// func getWindowMetadata(s Storage, key string, winId string) WindowMeta {
+func flushWindow[T any](s Storage, cpId string, key string, winId string) ([]Message[T], error) {
+	m, err := s.flushWindow(cpId, key, winId)
+	if err != nil {
+		return nil, err
+	}
 
-// }
+	msgs := make([]Message[T], len(m))
 
-// func getWindowsMetadataByKey(s Storage, key string) WindowMeta {
+	for i := range m {
+		msgs[i] = m[i].(Message[T])
+	}
 
-// }
+	return msgs, nil
+}
 
-// func closeWindow(s Storage, key string, winId string) WindowMeta {
+func destroyWindow(s Storage, cpId string, key string, winId string) error {
+	return s.destroyWindow(cpId, key, winId)
+}
 
-// }
+func getWindowSize(s Storage, cpId string, key string, winId string) (int, error) {
+	return s.getWindowSize(cpId, key, winId)
+}
 
-// func flushWindow(s Storage, key string, winId string) WindowMeta {
-
-// }
-
-// func destroyWindow(s Storage, key string, winId string) WindowMeta {
-
-// }
-
-// func getWindowSize(s Storage, key string, winId string) WindowMeta {
-
-// }
-
-// func getKeys(s Storage) WindowMeta {
-
-// }
+func getKeys(cpId string, s Storage) ([]string, error) {
+	return s.getKeys(cpId)
+}

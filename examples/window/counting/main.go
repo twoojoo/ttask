@@ -5,10 +5,7 @@ import (
 	"log"
 	"time"
 
-	. "github.com/twoojoo/ttask/operator"
-	. "github.com/twoojoo/ttask/source"
-	. 
-	. "github.com/twoojoo/ttask/window"
+	. "github.com/twoojoo/ttask"
 )
 
 func main() {
@@ -16,7 +13,7 @@ func main() {
 	// should split
 	T(T(
 		FromStringSplit("t1", "one two three four five six seven eight nine ten", " "),
-		CountingWindow(CWOptions[string]{
+		CountingWindow("win-1", CWOptions[string]{
 			Size:          3,
 			MaxInactivity: 1000 * time.Millisecond,
 		})),
@@ -27,7 +24,7 @@ func main() {
 
 	T(T(
 		FromInterval("t2", time.Second, 10, func(count int) int { return count }),
-		CountingWindow(CWOptions[int]{
+		CountingWindow("win-2", CWOptions[int]{
 			Size:          2,
 			MaxInactivity: 700 * time.Millisecond,
 		})),
@@ -38,7 +35,7 @@ func main() {
 
 	T(T(
 		FromInterval("t3", time.Second, 10, func(count int) int { return count }),
-		CountingWindow(CWOptions[int]{
+		CountingWindow("win-3", CWOptions[int]{
 			Size:          2,
 			MaxInactivity: 1010 * time.Millisecond,
 		})),
