@@ -1,4 +1,4 @@
-package sink
+package ttask
 
 import (
 	"errors"
@@ -6,7 +6,6 @@ import (
 
 	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
 	"github.com/fatih/color"
-	"github.com/twoojoo/ttask/task"
 )
 
 type KafkaSinkOpts struct {
@@ -16,8 +15,8 @@ type KafkaSinkOpts struct {
 }
 
 // Sink: send the message to a kafka topic
-func ToKafka[T any](producer *kafka.Producer, topic string, toBytes func(x T) []byte, options KafkaSinkOpts) task.Operator[T, T] {
-	return func(inner *task.Inner, x *task.Message[T], next *task.Step) {
+func ToKafka[T any](producer *kafka.Producer, topic string, toBytes func(x T) []byte, options KafkaSinkOpts) Operator[T, T] {
+	return func(inner *Inner, x *Message[T], next *Step) {
 		ch := make(chan kafka.Event)
 
 		err := producer.Produce(&kafka.Message{

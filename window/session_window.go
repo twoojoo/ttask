@@ -1,20 +1,17 @@
-package window
+package ttask
 
 import (
 	"time"
-
-	"github.com/twoojoo/ttask/storage"
-	"github.com/twoojoo/ttask/task"
 )
 
-func SessionWindow[T any](options SWOptions[T]) task.Operator[T, []T] {
+func SessionWindow[T any](options SWOptions[T]) Operator[T, []T] {
 	parseSWOptions(&options)
 	storage := storage.NewStorageInterface(&options.Storage)
 
 	//store inactivity check goroutines
 	stopIncactivityCheckCh := map[string]chan int{}
 
-	return func(inner *task.Inner, x *task.Message[T], next *task.Step) {
+	return func(inner *Inner, x *Message[T], next *Step) {
 		meta := storage.GetWindowsMetadata(x.Key)
 		mt := getMessageTime(options.WindowingTime, x)
 		meta = assignMessageToWindows(meta, x, mt)
@@ -33,7 +30,7 @@ func SessionWindow[T any](options SWOptions[T]) task.Operator[T, []T] {
 
 				//on incactivity: close
 				if meta.End == 0 && meta.Last <= time.Now().UnixMilli()-options.MaxInactivity.Milliseconds() {
-					storage.CloseWindow(x.Key, meta.Id, options.Watermark, func(items []task.Message[T]) {
+					storage.CloseWindow(x.Key, meta.Id, options.Watermark, func(items []Message[T]) {
 						if len(items) > 0 {
 							inner.ExecNext(task.ToArray(x, items), next)
 						}
@@ -49,7 +46,7 @@ func SessionWindow[T any](options SWOptions[T]) task.Operator[T, []T] {
 
 				//on incactivity: close
 				if meta.End == 0 && meta.Last <= time.Now().UnixMilli()-options.MaxInactivity.Milliseconds() {
-					storage.CloseWindow(x.Key, meta.Id, options.Watermark, func(items []task.Message[T]) {
+					storage.CloseWindow(x.Key, meta.Id, options.Watermark, func(items []Message[T]) {
 						if len(items) > 0 {
 							inner.ExecNext(task.ToArray(x, items), next)
 						}
@@ -65,7 +62,7 @@ func SessionWindow[T any](options SWOptions[T]) task.Operator[T, []T] {
 
 				//on max size: close
 				if meta.End == 0 {
-					storage.CloseWindow(x.Key, meta.Id, options.Watermark, func(items []task.Message[T]) {
+					storage.CloseWindow(x.Key, meta.Id, options.Watermark, func(items []Message[T]) {
 						if len(items) > 0 {
 							inner.ExecNext(task.ToArray(x, items), next)
 						}

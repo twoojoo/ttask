@@ -1,17 +1,15 @@
-package operator
+package ttask
 
 import (
 	"log"
 
 	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
 	"github.com/fatih/color"
-	"github.com/twoojoo/ttask/task"
-	"github.com/twoojoo/ttask/types"
 )
 
 // Perform a commit on the current kafka message.
-func KafkaCommit[T any](consumer *kafka.Consumer, logger bool) task.Operator[types.KafkaMessage[T], types.KafkaMessage[T]] {
-	return func(inner *task.Inner, x *task.Message[types.KafkaMessage[T]], next *task.Step) {
+func KafkaCommit[T any](consumer *kafka.Consumer, logger bool) Operator[KafkaMessage[T], KafkaMessage[T]] {
+	return func(inner *Inner, x *Message[KafkaMessage[T]], next *Step) {
 		tp := x.Value.TopicPartition
 
 		_, err := consumer.CommitOffsets([]kafka.TopicPartition{tp})
@@ -28,8 +26,8 @@ func KafkaCommit[T any](consumer *kafka.Consumer, logger bool) task.Operator[typ
 	}
 }
 
-// func KafkaCommitMany[T any](consumer *kafka.Consumer, logger bool) task.Operator[[]types.KafkaMessage[T], []types.KafkaMessage[T]] {
-// 	return func(inner *task.Inner, x *task.Message[[]types.KafkaMessage[T]], next *task.Step) {
+// func KafkaCommitMany[T any](consumer *kafka.Consumer, logger bool) Operator[[]types.KafkaMessage[T], []types.KafkaMessage[T]] {
+// 	return func(inner *Inner, x *Message[[]types.KafkaMessage[T]], next *Step) {
 // 		tp := []kafka.TopicPartition{}
 
 // 		for _, v := range x.Value {

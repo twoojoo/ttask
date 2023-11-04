@@ -1,20 +1,19 @@
-package window
+package ttask
 
 import (
 	"time"
 
 	"github.com/twoojoo/ttask/storage"
-	"github.com/twoojoo/ttask/task"
 )
 
-func HoppingWindow[T any](options HWOptions[T]) task.Operator[T, []T] {
+func HoppingWindow[T any](options HWOptions[T]) Operator[T, []T] {
 	parseHWOptions(&options)
 	storage := storage.NewStorageInterface(&options.Storage)
 
 	first := true
 	nextStart := int64(0)
 
-	return func(inner *task.Inner, x *task.Message[T], next *task.Step) {
+	return func(inner *Inner, x *Message[T], next *Step) {
 		if first {
 			first = false
 			go startWinLoop[T](options, func(start int64) {
@@ -32,7 +31,7 @@ func HoppingWindow[T any](options HWOptions[T]) task.Operator[T, []T] {
 
 					for i := range meta {
 						if meta[i].End == 0 && meta[i].Start <= (end-options.Size.Milliseconds()) {
-							storage.CloseWindow(x.Key, meta[i].Id, options.Watermark, func(items []task.Message[T]) {
+							storage.CloseWindow(x.Key, meta[i].Id, options.Watermark, func(items []Message[T]) {
 								if len(items) > 0 {
 									inner.ExecNext(task.ToArray(x, items), next)
 								}

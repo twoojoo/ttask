@@ -1,4 +1,4 @@
-package task
+package ttask
 
 import (
 	"context"
@@ -13,6 +13,15 @@ type Inner struct {
 	lastResult any
 	catcher    func(t *Inner, e error)
 	error      error
+	storage    Storage
+}
+
+func (i *Inner) getStorage() Storage {
+	return i.storage
+}
+
+func (i *Inner) setStorage(s Storage) {
+	i.storage = s
 }
 
 // Calling this function will cause the Task flow to be interrupted before the next operator.
@@ -49,10 +58,15 @@ func (inner *Inner) ExecNext(x any, next *Step) {
 			inner.catcher(inner, inner.error)
 		}
 
+		// msgId := getMessageId(x)
+		// inner.storage.clearCheckpoint(inner.TaskID(), msgId)
+
 		return
 	}
 
 	if next == nil {
+		// msgId := getMessageId(x)
+		// inner.storage.clearCheckpoint(inner.TaskID(), msgId)
 		return
 	}
 
@@ -71,6 +85,26 @@ func (inner *Inner) ExecNext(x any, next *Step) {
 	nextActionValue.Call(argsValue)
 }
 
+// Return the id of the task
 func (m Inner) TaskID() string {
 	return m.taskId
+}
+
+func getMessageId(msg any) string {
+	msgPtr := reflect.ValueOf(msg)
+
+	for i := 0; i < msgPtr.Elem().NumField(); i++ {
+		str, ok := msgPtr.Elem().
+			MethodByName("GetID").
+			Call([]reflect.Value{})[0].
+			Interface().(string)
+
+		if !ok {
+			panic("failed to extract message id")
+		}
+
+		return str
+	}
+
+	panic("failed to extract message id")
 }

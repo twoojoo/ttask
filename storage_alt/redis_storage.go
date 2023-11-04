@@ -5,11 +5,10 @@ import (
 	"strings"
 
 	"github.com/redis/go-redis/v9"
-	"github.com/twoojoo/ttask/task"
 )
 
-func Redis[T any](id string, redis *redis.Client) *RedisStorage[task.Message[T]] {
-	return &RedisStorage[task.Message[T]]{
+func Redis[T any](id string, redis *redis.Client) *RedisStorage[Message[T]] {
+	return &RedisStorage[Message[T]]{
 		client: redis,
 		id:     id,
 	}

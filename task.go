@@ -1,4 +1,4 @@
-package task
+package ttask
 
 type TTask[O, T any] struct {
 	id         string
@@ -7,7 +7,7 @@ type TTask[O, T any] struct {
 	first      *Step
 	last       int
 	path       map[int]any
-	meta       *Inner
+	inner      *Inner
 }
 
 // Use this to build custom sources only. Not an injectable task.
@@ -22,10 +22,11 @@ func Task[T any](id string) *TTask[T, T] {
 			action: nil,
 			next:   nil,
 		},
-		meta: &Inner{
+		inner: &Inner{
 			taskId:  id,
 			Context: nil,
 			error:   nil,
+			storage: NewMemoryStorage(),
 		},
 	}
 
@@ -45,7 +46,7 @@ func Injectable[T any](id string) *TTask[T, T] {
 			action: nil,
 			next:   nil,
 		},
-		meta: &Inner{
+		inner: &Inner{
 			taskId:  id,
 			Context: nil,
 			error:   nil,
@@ -57,6 +58,11 @@ func Injectable[T any](id string) *TTask[T, T] {
 
 // Add an operator to the Task. Returns the updated Task.
 func T[O, T, R any](t *TTask[O, T], operator Operator[T, R]) *TTask[O, R] {
+	return Via(t, operator)
+}
+
+// Add an operator to the Task. Returns the updated Task.
+func Via[O, T, R any](t *TTask[O, T], operator Operator[T, R]) *TTask[O, R] {
 	if t.locked {
 		panic("adding operator to locked task: " + t.id)
 	}
@@ -89,8 +95,13 @@ func T[O, T, R any](t *TTask[O, T], operator Operator[T, R]) *TTask[O, R] {
 		first:      t.first,
 		path:       t.path,
 		last:       t.last + 1,
-		meta:       t.meta,
+		inner:      t.inner,
 	}
+}
+
+func (t *TTask[O, T]) WithStorage(s Storage) *TTask[O, T] {
+	t.inner.setStorage(s)
+	return t
 }
 
 func (t TTask[O, T]) IsInjectable() bool {

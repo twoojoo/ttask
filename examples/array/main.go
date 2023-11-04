@@ -8,9 +8,7 @@ import (
 	"strconv"
 	"time"
 
-	. "github.com/twoojoo/ttask/operator"
-	. "github.com/twoojoo/ttask/source"
-	. "github.com/twoojoo/ttask/task"
+	. "github.com/twoojoo/ttask"
 )
 
 func main() {

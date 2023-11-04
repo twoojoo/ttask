@@ -5,8 +5,7 @@ import (
 	"log"
 	"strconv"
 
-	. "github.com/twoojoo/ttask/operator"
-	. "github.com/twoojoo/ttask/task"
+	. "github.com/twoojoo/ttask"
 )
 
 // generate a custom operator that use custom params

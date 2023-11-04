@@ -1,15 +1,14 @@
-package sink
+package ttask
 
 import (
 	"io"
 
-	"github.com/twoojoo/ttask/task"
 	"github.com/twoojoo/ttask/utils"
 )
 
 // Sink: write each Task result to a file unsing a separator (default: \n)
-func ToFile(path string, separator ...string) task.Operator[string, string] {
-	return func(inner *task.Inner, x *task.Message[string], next *task.Step) {
+func ToFile(path string, separator ...string) Operator[string, string] {
+	return func(inner *Inner, x *Message[string], next *Step) {
 		file, err := utils.OpenOrCreateFile(path)
 		defer file.Close()
 

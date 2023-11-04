@@ -1,14 +1,12 @@
-package operator
+package ttask
 
 import (
 	"time"
-
-	"github.com/twoojoo/ttask/task"
 )
 
 // Delay the next task step.
-func Delay[T any](d time.Duration) task.Operator[T, T] {
-	return func(inner *task.Inner, x *task.Message[T], next *task.Step) {
+func Delay[T any](d time.Duration) Operator[T, T] {
+	return func(inner *Inner, x *Message[T], next *Step) {
 		time.Sleep(d)
 		inner.ExecNext(x, next)
 	}
@@ -18,16 +16,16 @@ func Delay[T any](d time.Duration) task.Operator[T, T] {
 // Chaining a locked task will cause the application to panic.
 // The act of chaininga locks the chained task as if Lock() method was called.
 // The child task must be an injectable task, otherwise the process will panic.
-func Chain[O, T any](t *task.TTask[O, T]) task.Operator[O, T] {
+func Chain[O, T any](t *TTask[O, T]) Operator[O, T] {
 	if !t.IsInjectable() {
 		panic("TTask error: cannot use a non injectable task in  a Branch operator")
 	}
 
 	chainCh := make(chan chainInfo)
-	task.T(t, chain[T](chainCh))
+	Via(t, chain[T](chainCh))
 	t.Lock()
 
-	return func(inner *task.Inner, x *task.Message[O], next *task.Step) {
+	return func(inner *Inner, x *Message[O], next *Step) {
 		go func() {
 			chainCh <- chainInfo{
 				innerPtr: inner,
@@ -40,12 +38,12 @@ func Chain[O, T any](t *task.TTask[O, T]) task.Operator[O, T] {
 }
 
 type chainInfo struct {
-	innerPtr *task.Inner
-	nextPtr  *task.Step
+	innerPtr *Inner
+	nextPtr  *Step
 }
 
-func chain[T any](ch chan chainInfo) task.Operator[T, T] {
-	return TapRaw(func(inner *task.Inner, x *task.Message[T]) {
+func chain[T any](ch chan chainInfo) Operator[T, T] {
+	return TapRaw(func(inner *Inner, x *Message[T]) {
 		chainInfo := <-ch
 		chainInfo.innerPtr.ExecNext(x, chainInfo.nextPtr)
 	})
@@ -56,14 +54,14 @@ func chain[T any](ch chan chainInfo) task.Operator[T, T] {
 // Branching a task will cause the child task to be locked as if Lock() method was called.
 // An already locked task can be used as child task when branching.
 // The child task must be an injectable task, otherwise the process will panic.
-func Branch[T any](t *task.TTask[T, T]) task.Operator[T, T] {
+func Branch[T any](t *TTask[T, T]) Operator[T, T] {
 	t.Lock()
 
 	if !t.IsInjectable() {
 		panic("TTask error: cannot use a non injectable task in  a Branch operator")
 	}
 
-	return func(inner *task.Inner, x *task.Message[T], next *task.Step) {
+	return func(inner *Inner, x *Message[T], next *Step) {
 		msgCopy := *x
 
 		go func() {
@@ -75,14 +73,14 @@ func Branch[T any](t *task.TTask[T, T]) task.Operator[T, T] {
 }
 
 // Similar to the Branch operator, but redirects to the new task only messages that pass the provided filter
-func BranchWhere[T any](t *task.TTask[T, T], filter func(x T) bool) task.Operator[T, T] {
+func BranchWhere[T any](t *TTask[T, T], filter func(x T) bool) Operator[T, T] {
 	t.Lock()
 
 	if !t.IsInjectable() {
 		panic("TTask error: cannot use a non injectable task in  a BranchWhere operator")
 	}
 
-	return func(inner *task.Inner, x *task.Message[T], next *task.Step) {
+	return func(inner *Inner, x *Message[T], next *Step) {
 		msgCopy := *x
 
 		if filter(x.Value) {
@@ -96,14 +94,14 @@ func BranchWhere[T any](t *task.TTask[T, T], filter func(x T) bool) task.Operato
 }
 
 // Similar to the BranchWhere operator, but messages will either pass to the new branch or continue in the current one
-func BranchSwitch[T any](t *task.TTask[T, T], filter func(x T) bool) task.Operator[T, T] {
+func BranchSwitch[T any](t *TTask[T, T], filter func(x T) bool) Operator[T, T] {
 	t.Lock()
 
 	if !t.IsInjectable() {
 		panic("TTask error: cannot use a non injectable task in  a BranchSwitch operator")
 	}
 
-	return func(inner *task.Inner, x *task.Message[T], next *task.Step) {
+	return func(inner *Inner, x *Message[T], next *Step) {
 		msgCopy := *x
 
 		if filter(x.Value) {
@@ -117,11 +115,11 @@ func BranchSwitch[T any](t *task.TTask[T, T], filter func(x T) bool) task.Operat
 }
 
 // Process n messages in parallel using an in-memory buffer
-func Parallelize[T any](n int) task.Operator[T, T] {
-	cache := []*task.Message[T]{}
+func Parallelize[T any](n int) Operator[T, T] {
+	cache := []*Message[T]{}
 	ch := make(chan struct{}, n)
 
-	return func(inner *task.Inner, x *task.Message[T], next *task.Step) {
+	return func(inner *Inner, x *Message[T], next *Step) {
 		cache = append(cache, x)
 
 		if len(cache) == n {

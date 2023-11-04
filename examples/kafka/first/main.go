@@ -6,11 +6,7 @@ import (
 	"time"
 
 	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
-	. "github.com/twoojoo/ttask/operator"
-	. "github.com/twoojoo/ttask/sink"
-	. "github.com/twoojoo/ttask/source"
-	. "github.com/twoojoo/ttask/task"
-	. "github.com/twoojoo/ttask/types"
+	. "github.com/twoojoo/ttask"
 )
 
 func main() {

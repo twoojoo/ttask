@@ -1,8 +1,7 @@
-package window
+package ttask
 
 import (
 	"github.com/twoojoo/ttask/storage"
-	"github.com/twoojoo/ttask/task"
 )
 
 // Counting Window:
@@ -10,13 +9,13 @@ import (
 // ...1....2.........3...........4...5......6........7....8....
 //
 // ..[----------------].........[------------]......[----------
-func CountingWindow[T any](options CWOptions[T]) task.Operator[T, []T] {
+func CountingWindow[T any](options CWOptions[T]) Operator[T, []T] {
 	parseCWOptions(&options)
 	storage := storage.NewStorageInterface(&options.Storage)
 
 	stopIncactivityCheckCh := map[string]chan int{}
 
-	return func(inner *task.Inner, x *task.Message[T], next *task.Step) {
+	return func(inner *Inner, x *Message[T], next *Step) {
 		//cancel last inactivity check
 		if stopIncactivityCheckCh[x.Key] != nil {
 			stopIncactivityCheckCh[x.Key] <- 1

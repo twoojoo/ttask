@@ -1,4 +1,4 @@
-package operator
+package ttask
 
 import (
 	"errors"
@@ -7,12 +7,10 @@ import (
 
 	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
 	"github.com/fatih/color"
-	"github.com/twoojoo/ttask/task"
-	"github.com/twoojoo/ttask/types"
 )
 
-func fromKafka(consumer *kafka.Consumer, logger bool, timeout ...time.Duration) task.Operator[any, types.KafkaMessage[[]byte]] {
-	return func(inner *task.Inner, x *task.Message[any], next *task.Step) {
+func fromKafka(consumer *kafka.Consumer, logger bool, timeout ...time.Duration) Operator[any, KafkaMessage[[]byte]] {
+	return func(inner *Inner, x *Message[any], next *Step) {
 		to := time.Second
 
 		if len(timeout) > 0 {
@@ -22,11 +20,11 @@ func fromKafka(consumer *kafka.Consumer, logger bool, timeout ...time.Duration) 
 		for {
 			msg, err := consumer.ReadMessage(to)
 			if err == nil {
-				tMsg := task.NewMessage(types.KafkaMessage[[]byte]{
+				tMsg := newMessage(KafkaMessage[[]byte]{
 					TopicPartition: msg.TopicPartition,
 					Key:            string(msg.Key),
 					Value:          msg.Value,
-				}).WithKey(string(msg.Key))
+				}).withKey(string(msg.Key))
 
 				if logger {
 					logKafkaMessage(msg)
@@ -41,8 +39,8 @@ func fromKafka(consumer *kafka.Consumer, logger bool, timeout ...time.Duration) 
 }
 
 // Source: trigger a Task execution for each received message.
-func FromKafka(taskId string, consumer *kafka.Consumer, logger bool, timeout ...time.Duration) *task.TTask[any, types.KafkaMessage[[]byte]] {
-	return task.T(task.Task[any](taskId), fromKafka(consumer, logger, timeout...))
+func FromKafka(taskId string, consumer *kafka.Consumer, logger bool, timeout ...time.Duration) *TTask[any, KafkaMessage[[]byte]] {
+	return Via(Task[any](taskId), fromKafka(consumer, logger, timeout...))
 }
 
 func logKafkaMessage(msg *kafka.Message) {

@@ -1,14 +1,12 @@
-package operator
+package ttask
 
 import (
 	"bufio"
 	"os"
-
-	"github.com/twoojoo/ttask/task"
 )
 
-func fromFile(path string) task.Operator[any, string] {
-	return func(inner *task.Inner, _ *task.Message[any], next *task.Step) {
+func fromFile(path string) Operator[any, string] {
+	return func(inner *Inner, _ *Message[any], next *Step) {
 		file, err := os.Open(path)
 
 		if err != nil {
@@ -22,7 +20,7 @@ func fromFile(path string) task.Operator[any, string] {
 
 		for scanner.Scan() {
 			line := scanner.Text()
-			inner.ExecNext(task.NewMessage(line), next)
+			inner.ExecNext(newMessage(line), next)
 		}
 
 		if err := scanner.Err(); err != nil {
@@ -33,6 +31,6 @@ func fromFile(path string) task.Operator[any, string] {
 }
 
 // Source: read a file an trigger a Task execution for each line.
-func FromFile(taskId string, path string) *task.TTask[any, string] {
-	return task.T(task.Task[any](taskId), fromFile(path))
+func FromFile(taskId string, path string) *TTask[any, string] {
+	return Via(Task[any](taskId), fromFile(path))
 }
