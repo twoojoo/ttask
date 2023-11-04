@@ -1,74 +1,113 @@
 package ttask
 
-// import (
-// 	"time"
-// )
+import (
+	"time"
+)
 
-// func SessionWindow[T any](options SWOptions[T]) Operator[T, []T] {
-// 	parseSWOptions(&options)
-// 	storage := storage.NewStorageInterface(&options.Storage)
+func SessionWindow[T any](id string, options SWOptions[T]) Operator[T, []T] {
+	parseSWOptions(&options)
 
-// 	//store inactivity check goroutines
-// 	stopIncactivityCheckCh := map[string]chan int{}
+	//store inactivity check goroutines
+	stopIncactivityCheckCh := map[string]chan int{}
 
-// 	return func(inner *Inner, x *Message[T], next *Step) {
-// 		meta := storage.GetWindowsMetadata(x.Key)
-// 		mt := getMessageTime(options.WindowingTime, x)
-// 		meta = assignMessageToWindows(meta, x, mt)
+	return func(i *Inner, x *Message[T], next *Step) {
+		meta, err := getWindowsMetadataByKey(i.storage, id, x.Key)
+		if err != nil {
+			i.Error(err)
+			return
+		}
 
-// 		//cancel last inactivity check for this key
-// 		if stopIncactivityCheckCh[x.Key] != nil {
-// 			stopIncactivityCheckCh[x.Key] <- 1
-// 		}
+		mt := getMessageTime(options.WindowingTime, x)
+		meta = assignMessageToWindows(meta, x, mt)
 
-// 		if len(meta) > 0 { // window exists
-// 			storage.PushItemToWindow(x.Key, meta[0].Id, *x)
+		//cancel last inactivity check for this key
+		if stopIncactivityCheckCh[x.Key] != nil {
+			stopIncactivityCheckCh[x.Key] <- 1
+		}
 
-// 			//start inactivity check and store stopping channel
-// 			stopIncactivityCheckCh[x.Key] = startInactivityCheck(options.MaxInactivity, func() {
-// 				meta := storage.GetWindowMetadata(x.Key, meta[0].Id)
+		if len(meta) > 0 { // window exists
+			_, err := pushMessageToWindow(i.storage, id, x.Key, meta[0].Id, *x)
+			if err != nil {
+				i.Error(err)
+				return
+			}
 
-// 				//on incactivity: close
-// 				if meta.End == 0 && meta.Last <= time.Now().UnixMilli()-options.MaxInactivity.Milliseconds() {
-// 					storage.CloseWindow(x.Key, meta.Id, options.Watermark, func(items []Message[T]) {
-// 						if len(items) > 0 {
-// 							inner.ExecNext(task.ToArray(x, items), next)
-// 						}
-// 					})
-// 				}
-// 			})
-// 		} else { // window doesn't exist
-// 			meta := storage.StartNewWindow(x.Key, *x)
+			//start inactivity check and store stopping channel
+			stopIncactivityCheckCh[x.Key] = startInactivityCheck(options.MaxInactivity, func() {
+				meta, err := getWindowMetadata(i.storage, id, x.Key, meta[0].Id)
+				if err != nil {
+					i.Error(err)
+					return
+				}
 
-// 			//start inactivity check and store stopping channel
-// 			stopIncactivityCheckCh[x.Key] = startInactivityCheck(options.MaxInactivity, func() {
-// 				meta := storage.GetWindowMetadata(x.Key, meta.Id)
+				//on incactivity: close
+				if meta.End.IsZero() && (meta.Last.Before(time.Now().Add(-options.MaxInactivity)) || meta.Last.Equal(time.Now().Add(-options.MaxInactivity))) {
+					err := closeWindow(i.storage, id, x.Key, meta.Id, options.Watermark, func(items []Message[T]) {
+						if len(items) > 0 {
+							i.ExecNext(toArray(x, items), next)
+						}
+					})
 
-// 				//on incactivity: close
-// 				if meta.End == 0 && meta.Last <= time.Now().UnixMilli()-options.MaxInactivity.Milliseconds() {
-// 					storage.CloseWindow(x.Key, meta.Id, options.Watermark, func(items []Message[T]) {
-// 						if len(items) > 0 {
-// 							inner.ExecNext(task.ToArray(x, items), next)
-// 						}
-// 					})
-// 				}
-// 			})
+					if err != nil {
+						i.Error(err)
+						return
+					}
+				}
+			})
+		} else { // window doesn't exist
+			meta, err := startNewWindow(i.storage, id, x.Key, *x)
+			if err != nil {
+				i.Error(err)
+				return
+			}
 
-// 			// start max size counter
-// 			go func() {
-// 				time.Sleep(options.MaxSize)
+			//start inactivity check and store stopping channel
+			stopIncactivityCheckCh[x.Key] = startInactivityCheck(options.MaxInactivity, func() {
+				meta, err := getWindowMetadata(i.storage, id, x.Key, meta.Id)
+				if err != nil {
+					i.Error(err)
+					return
+				}
 
-// 				meta := storage.GetWindowMetadata(x.Key, meta.Id)
+				//on incactivity: close
+				if meta.End.IsZero() && (meta.Last.Before(time.Now().Add(-options.MaxInactivity)) || meta.Last.Equal(time.Now().Add(-options.MaxInactivity))) {
+					err := closeWindow(i.storage, id, x.Key, meta.Id, options.Watermark, func(items []Message[T]) {
+						if len(items) > 0 {
+							i.ExecNext(toArray(x, items), next)
+						}
+					})
 
-// 				//on max size: close
-// 				if meta.End == 0 {
-// 					storage.CloseWindow(x.Key, meta.Id, options.Watermark, func(items []Message[T]) {
-// 						if len(items) > 0 {
-// 							inner.ExecNext(task.ToArray(x, items), next)
-// 						}
-// 					})
-// 				}
-// 			}()
-// 		}
-// 	}
-// }
+					if err != nil {
+						i.Error(err)
+						return
+					}
+				}
+			})
+
+			// start max size counter
+			go func() {
+				time.Sleep(options.MaxSize)
+
+				meta, err := getWindowMetadata(i.storage, id, x.Key, meta.Id)
+				if err != nil {
+					i.Error(err)
+					return
+				}
+
+				//on max size: close
+				if meta.End.IsZero() {
+					err := closeWindow(i.storage, id, x.Key, meta.Id, options.Watermark, func(items []Message[T]) {
+						if len(items) > 0 {
+							i.ExecNext(toArray(x, items), next)
+						}
+					})
+
+					if err != nil {
+						i.Error(err)
+						return
+					}
+				}
+			}()
+		}
+	}
+}

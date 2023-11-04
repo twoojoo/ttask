@@ -51,41 +51,31 @@ func parseHWOptions[T any](o *HWOptions[T]) {
 	}
 }
 
-// // Defaults:
-// //   - Storage: memory (no persistence)
-// //   - Id: random uuid
-// //   - MaxInactivity: 1 second
-// //   - MaxSize: MaxInactivity * 2
-// type SWOptions[T any] struct {
-// 	Id            string
-// 	Storage       storage.Storage[Message[T]]
-// 	MaxSize       time.Duration
-// 	MaxInactivity time.Duration
-// 	Watermark     time.Duration
-// 	WindowingTime WindowingTime
-// }
+// Defaults:
+//   - Storage: memory (no persistence)
+//   - Id: random uuid
+//   - MaxInactivity: 1 second
+//   - MaxSize: MaxInactivity * 2
+type SWOptions[T any] struct {
+	MaxSize       time.Duration
+	MaxInactivity time.Duration
+	Watermark     time.Duration
+	WindowingTime WindowingTime
+}
 
-// func parseSWOptions[T any](o *SWOptions[T]) {
-// 	if o.Storage == nil {
-// 		o.Storage = storage.Memory[T]()
-// 	}
+func parseSWOptions[T any](o *SWOptions[T]) {
+	if o.MaxInactivity == 0 {
+		o.MaxInactivity = 1 * time.Second
+	}
 
-// 	if o.Id == "" {
-// 		o.Id = uuid.New().String()
-// 	}
+	if o.MaxSize == 0 {
+		o.MaxSize = 2 * o.MaxInactivity
+	}
 
-// 	if o.MaxInactivity == 0 {
-// 		o.MaxInactivity = 1 * time.Second
-// 	}
-
-// 	if o.MaxSize == 0 {
-// 		o.MaxSize = 2 * o.MaxInactivity
-// 	}
-
-// 	if o.WindowingTime == "" {
-// 		o.WindowingTime = ProcessingTime
-// 	}
-// }
+	if o.WindowingTime == "" {
+		o.WindowingTime = ProcessingTime
+	}
+}
 
 // Defaults:
 //   - Storage: memory (no persistence)
