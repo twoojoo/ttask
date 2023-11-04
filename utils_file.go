@@ -1,10 +1,10 @@
-package utils
+package ttask
 
 import (
 	"os"
 )
 
-func OpenOrCreateFile(path string) (*os.File, error) {
+func openOrCreateFile(path string) (*os.File, error) {
 	file, err := os.OpenFile(path, os.O_APPEND|os.O_WRONLY, os.ModeAppend)
 
 	if os.IsNotExist(err) {
