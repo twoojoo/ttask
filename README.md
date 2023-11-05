@@ -15,7 +15,7 @@ go run examples/<example_name>/main.go
 
 #e.g.
 # go run examples/array/main.go
-# go run examples/window/tumbling.go
+# go run examples/window/tumbling/main.go
 ```
 
 ### Table of contents
