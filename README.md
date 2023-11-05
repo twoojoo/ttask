@@ -11,7 +11,7 @@ Working examples in the [examples](./examples) folder. Run with:
 ```bash
 git clone https://github.com/twoojoo/ttask.git
 cd ttask
-go run examples/<example_name>/main.go
+go run examples/<example_path>/main.go
 
 #e.g.
 # go run examples/array/main.go
