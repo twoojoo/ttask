@@ -83,7 +83,7 @@ func (inner *Inner) ExecNext(x any, next *Step) {
 }
 
 // Return the id of the task
-func (m Inner) TaskID() string {
+func (m *Inner) TaskID() string {
 	return m.taskId
 }
 
