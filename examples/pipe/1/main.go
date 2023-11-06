@@ -24,7 +24,7 @@ func main() {
 			log.Println("> reducing", x)
 			return *acc + "|" + x
 		})),
-		ToStdoutln[string](func(x string) string {
+		ToStdoutln(func(x string) string {
 			return x
 		}),
 	).Catch(func(i *Inner, e error) {
