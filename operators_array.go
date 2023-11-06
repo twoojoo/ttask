@@ -148,3 +148,24 @@ func ParallelizeArray[T any]() Operator[[]T, T] {
 		}
 	}
 }
+
+// Continue the task exection for each element of the array asynchronously
+func Distinct[T comparable]() Operator[[]T, []T] {
+	return func(inner *Inner, x *Message[[]T], next *Step) {
+		set := removeDuplicate(x.Value)
+
+		inner.ExecNext(replaceValue(x, set), next)
+	}
+}
+
+func removeDuplicate[T comparable](sliceList []T) []T {
+	allKeys := make(map[T]bool)
+	list := []T{}
+	for _, item := range sliceList {
+		if _, value := allKeys[item]; !value {
+			allKeys[item] = true
+			list = append(list, item)
+		}
+	}
+	return list
+}

@@ -40,7 +40,7 @@ func main() {
 	fmt.Println("-----------------")
 
 	T(T(
-		FromItem("iterate-array-example", []int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}),
+		FromItem("iterate-array-example", []int{0, 1, 2, 3, 4, 5, 5, 6, 7, 8, 9}),
 		IterateArray[int]()),
 		Print[int]("order >"),
 	).Catch(func(i *Inner, e error) {
@@ -49,8 +49,9 @@ func main() {
 
 	fmt.Println("-----------------")
 
-	T(T(T(
-		FromItem("parallelize-array-example", []int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}),
+	T(T(T(T(
+		FromItem("parallelize-array-example", []int{0, 1, 2, 3, 4, 5, 5, 6, 7, 8, 9}),
+		Distinct[int]()),
 		ParallelizeArray[int]()),
 		Delay[int](time.Duration(rand.Intn(100))*time.Millisecond)),
 		Print[int]("chaos >"),
