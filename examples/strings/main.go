@@ -16,10 +16,11 @@ func main() {
 	T(T(T(
 		FromStringSplit("strings-example", str, " "),
 		CountingWindow("win1", CWOptions[string]{
+			Size:          10,
 			MaxInactivity: time.Second,
 		})),
 		Concat("|")),
-		Print[string]("sum >"),
+		Print[string](">"),
 	).Catch(func(i *Inner, e error) {
 		log.Fatal(e)
 	}).Run(ctx)
