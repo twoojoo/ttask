@@ -72,6 +72,27 @@ func FilterArrayRaw[T any](cb func(inner *Inner, x *Message[T]) bool) Operator[[
 	}
 }
 
+func Find[T any](cb func(x T) bool) Operator[[]T, T] {
+	return func(inner *Inner, x *Message[[]T], next *Step) {
+		for i := 0; i < len(x.Value); i++ {
+			if cb(x.Value[i]) {
+				inner.ExecNext(replaceValue(x, x.Value[i]), next)
+				return
+			}
+		}
+	}
+}
+
+func FindRaw[T any](cb func(inner *Inner, x *Message[T]) bool) Operator[[]T, T] {
+	return func(inner *Inner, x *Message[[]T], next *Step) {
+		for i := 0; i < len(x.Value); i++ {
+			if cb(inner, replaceValue(x, x.Value[i])) {
+				inner.ExecNext(replaceValue(x, x.Value[i]), next)
+			}
+		}
+	}
+}
+
 // JS-like array reducer
 func ReduceArray[T, R any](base R, reducer func(acc *R, x T) R) Operator[[]T, R] {
 	baseCp := *&base
