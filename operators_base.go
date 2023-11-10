@@ -65,7 +65,7 @@ func MapRaw[T, R any](cb func(inner *Inner, x *Message[T]) R) Operator[T, R] {
 }
 
 // Filter messages.
-func Filter[T, R any](cb func(x T) bool) Operator[T, T] {
+func Filter[T any](cb func(x T) bool) Operator[T, T] {
 	return func(inner *Inner, x *Message[T], next *Step) {
 		ok := cb(x.Value)
 		if ok {

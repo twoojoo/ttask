@@ -1,5 +1,7 @@
 package ttask
 
+import "golang.org/x/exp/constraints"
+
 func Sum[T Number]() Operator[[]T, T] {
 	return func(inner *Inner, x *Message[[]T], step *Step) {
 		var sum T = 0
@@ -68,4 +70,14 @@ func Average[X Number]() Operator[[]X, X] {
 
 		inner.ExecNext(replaceValue(x, sum/l), step)
 	}
+}
+
+func IsEven[T constraints.Integer]() func(x T) bool {
+	return func(x T) bool {
+		return x%2 == 0
+	}
+}
+
+func IsOdd[T constraints.Integer](x int) bool {
+	return x%2 == 1
 }

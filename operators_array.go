@@ -3,16 +3,19 @@ package ttask
 func Array[T, R any](operator Operator[T, R]) Operator[[]T, []R] {
 	return func(inner *Inner, x *Message[[]T], next *Step) {
 		result := []R{}
+
 		for i := range x.Value {
 			var v R
 			operator(inner, replaceValue(x, x.Value[i]), &Step{
-				action: func(_ any, val Message[R], _ any) {
+				action: func(_ any, val *Message[R], _ any) {
 					v = val.Value
 				},
 			})
 
 			result = append(result, v)
 		}
+
+		inner.ExecNext(replaceValue(x, result), next)
 	}
 }
 

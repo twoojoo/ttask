@@ -6,7 +6,7 @@ func ToFloat64[T Number]() Operator[T, float64] {
 	}
 }
 
-func ToFloat32[T Number]() Operator[T, float64] {
+func ToFloat32[T Number]() Operator[T, float32] {
 	return func(inner *Inner, x *Message[T], step *Step) {
 		inner.ExecNext(replaceValue(x, float32(x.Value)), step)
 	}
