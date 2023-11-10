@@ -39,9 +39,7 @@ func main() {
 	T(T(T(T(
 		FromItem("average-example", numbers),
 		FlatArray[int]()),
-		MapArray(func(x int) float64 {
-			return float64(x)
-		})),
+		Array(ToFloat64[int]())),
 		Average[float64]()),
 		Print[float64]("average >"),
 	).Catch(func(i *Inner, e error) {
