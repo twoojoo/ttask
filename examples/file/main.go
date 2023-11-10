@@ -17,7 +17,7 @@ func main() {
 	ctx := context.Background()
 
 	in := "./examples/file/in.txt"
-	out := "./examples/file/outt.txt"
+	out := "./examples/file/out.txt"
 
 	tt.T(tt.T(tt.T(tt.T(tt.T(
 		tt.FromFile("t1", in),
