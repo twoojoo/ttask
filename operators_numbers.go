@@ -14,13 +14,13 @@ func Sum[T Number]() Operator[[]T, T] {
 
 func Multiply[T Number]() Operator[[]T, T] {
 	return func(inner *Inner, x *Message[[]T], step *Step) {
-		var sum T = 0
+		var product T = 1
 
 		for i := range x.Value {
-			sum *= x.Value[i]
+			product = product * x.Value[i]
 		}
 
-		inner.ExecNext(replaceValue(x, sum), step)
+		inner.ExecNext(replaceValue(x, product), step)
 	}
 }
 
