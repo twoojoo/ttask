@@ -58,4 +58,23 @@ func main() {
 	).Catch(func(i *Inner, e error) {
 		log.Fatal(e)
 	}).Run(ctx)
+
+	fmt.Println("-----------------")
+
+	// spark-like syntax
+	source := FromItem("spark-like-example", []int{0, 1, 2, 3, 4, 5, 5, 6, 7, 8, 9})
+
+	distinct := T(source, Distinct[int]())
+
+	parallel := T(distinct, ParallelizeArray[int]())
+
+	delayed := T(parallel, Delay[int](time.Duration(rand.Intn(100))*time.Millisecond))
+
+	printed := T(delayed, Print[int]("spark-like >"))
+
+	printed.Catch(func(i *Inner, e error) {
+		log.Fatal(e)
+	})
+
+	printed.Run(ctx)
 }
